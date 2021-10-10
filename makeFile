@@ -1,5 +1,0 @@
-ex1:
-
- 	 mkdir -p build 
-	gcc - Walll - Werror -o ./build/ ex1 main.c 
-	./build/ex1
