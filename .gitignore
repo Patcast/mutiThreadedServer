@@ -9,5 +9,6 @@ build/
 *.o
 *.so
 *.a
+*.pdf
 
 #add any other files or filetypes you do not want to appear in your repo in this file
