@@ -13,23 +13,20 @@
 
 int main(int argc, char* argv[]) {
 
-
-   char* ptr[] = {NULL, NULL, NULL};
+	char* ptr[] = {NULL, NULL, NULL};
 //sketch 1
-    ma_init();
-    ma_malloc(100);
-   
+    	ma_init();  
 //sketch 2
-    assert(NULL == ma_malloc(600)); //->should return NULL
-    assert(NULL != ma_malloc(200)); //->should not return NULL;
+	assert(NULL == ma_malloc(600)); //->should return NULL
+	assert(NULL != ma_malloc(200)); //->should not return NULL;
+	ma_init();
+    	ptr[0] = ma_malloc(400); //->should not return NULL (ma_init() clears all)  
+//sketch 3
+    	assert(ptr[0] != NULL);
+    	ptr[1] = ma_malloc(50);
     
     
 /*
-
-    ma_init();
-    ptr[0] = ma_malloc(400); //->should not return NULL (ma_init() clears all)  
-//sketch 3
-    assert(ptr[0] != NULL);
     // for debugging:
     // memset(ptr[0], 'a', 400); //-> makes this area easy to find when using GDB
     ma_free(ptr[0]);

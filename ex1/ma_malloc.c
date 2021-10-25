@@ -75,9 +75,9 @@ void* ma_malloc(size tsize) {
 			((mem_chunk_header*) ref) -> status = ALLOCATED; 
 			 
 			newChunk = ref +tsize + sizeof(mem_chunk_header);
-			((mem_chunk_header*) newChunk) -> status = 0; 
+			((mem_chunk_header*) newChunk) -> status = FREE; 
 			((mem_chunk_header*) newChunk) -> size = oldSize - tsize -sizeof(mem_chunk_header);
-			newChunk = newChunk + sizeof(mem_chunk_header);///new address after header.
+			return newChunk + sizeof(mem_chunk_header);///new address after header.
 				
 		}
 		else
