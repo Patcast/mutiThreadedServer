@@ -17,13 +17,13 @@ void ma_init();
  * Requesting for the tsize bytes from memory pool.
  * If the request is possible, the pointer to the first possible address byte (right after its header) in memory pool is returned.
  */
-void *ma_malloc(size tsize);
+void* ma_malloc(size tsize);
 
 /*
  * Releasing the bytes in memory pool which was hold by ptr, meaning makes those bytes available for other uses.
  * Implement also the coalescing behavior.
  */
-void ma_free(void *ptr);
+void ma_free(void* ptr);
 
 /*
  * This function is only for debugging. It prints out the entire memory pool.
