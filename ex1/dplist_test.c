@@ -17,7 +17,8 @@ void teardown(void) {
 START_TEST(test_ListFree)
     {
         // Test free NULL
-        dplist_t *list = NULL;
+        dplist_t* list = NULL;
+        
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
 
@@ -26,7 +27,6 @@ START_TEST(test_ListFree)
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
         // TODO : Test free with one element
-
         // TODO : Test free with multiple element
 
     }
@@ -73,6 +73,7 @@ int main(void) {
     tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
     tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
     // Add other tests here...
+    
 
     srunner_run_all(sr, CK_VERBOSE);
 

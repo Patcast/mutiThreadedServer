@@ -45,6 +45,7 @@ struct dplist_node {
 
 struct dplist {
     dplist_node_t *head;
+    int size;
     // more fields will be added later
 };
 
@@ -53,13 +54,21 @@ dplist_t *dpl_create() {
     list = malloc(sizeof(struct dplist));
     DPLIST_ERR_HANDLER(list == NULL, DPLIST_MEMORY_ERROR);
     list->head = NULL;
+    list->size = 0;
     // pointer drawing breakpoint
     return list;
 }
 
-void dpl_free(dplist_t **list) {
-
-    //TODO: add your code here
+void dpl_free(dplist_t** list) {
+	if ( *list !=NULL){
+		if((*list)->head == NULL){
+			free(*list);
+			*list = NULL;
+		}
+	
+	
+	} 
+    
 
 }
 
@@ -71,24 +80,27 @@ void dpl_free(dplist_t **list) {
  * ALWAYS check that you implementation works correctly in all these cases (check this on paper with list representation drawings!)
  **/
 
-dplist_t *dpl_insert_at_index(dplist_t *list, element_t element, int index) {
+dplist_t* dpl_insert_at_index (dplist_t *list, element_t element, int index) {
     dplist_node_t *ref_at_index, *list_node;
     if (list == NULL) return NULL;
-
     list_node = malloc(sizeof(dplist_node_t));
     DPLIST_ERR_HANDLER(list_node == NULL, DPLIST_MEMORY_ERROR);
     list_node->element = element;
+
     // pointer drawing breakpoint
     if (list->head == NULL) { // covers case 1
         list_node->prev = NULL;
         list_node->next = NULL;
         list->head = list_node;
+        list->size = (list -> size) +1 ; /// maybe good to add it at the top 
+
         // pointer drawing breakpoint
     } else if (index <= 0) { // covers case 2
         list_node->prev = NULL;
         list_node->next = list->head;
         list->head->prev = list_node;
         list->head = list_node;
+        list->size = (list -> size) +1 ; /// maybe good to add it at the top 
         // pointer drawing breakpoint
     } else {
         ref_at_index = dpl_get_reference_at_index(list, index);
@@ -99,28 +111,31 @@ dplist_t *dpl_insert_at_index(dplist_t *list, element_t element, int index) {
             list_node->next = ref_at_index;
             ref_at_index->prev->next = list_node;
             ref_at_index->prev = list_node;
+            list->size = (list -> size) +1 ; /// maybe good to add it at the top 
             // pointer drawing breakpoint
         } else { // covers case 3
             assert(ref_at_index->next == NULL);
             list_node->next = NULL;
             list_node->prev = ref_at_index;
             ref_at_index->next = list_node;
+            list->size = (list -> size) +1 ; /// maybe good to add it at the top 
             // pointer drawing breakpoint
         }
     }
     return list;
 }
 
-dplist_t *dpl_remove_at_index(dplist_t *list, int index) {
+dplist_t* dpl_remove_at_index (dplist_t *list, int index) {
 
     //TODO: add your code here
 
 }
 
-int dpl_size(dplist_t *list) {
-
-    //TODO: add your code here
-    return -1;
+int dpl_size (dplist_t* list) {
+	/*if (list->size != NULL) return list->size;
+	else */
+	
+	return -1;
 }
 
 dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
