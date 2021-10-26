@@ -18,7 +18,6 @@ START_TEST(test_ListFree)
     {
         // Test free NULL
         dplist_t* list = NULL;
-        
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
 
@@ -26,68 +25,117 @@ START_TEST(test_ListFree)
         list = dpl_create();
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
-        // TODO : Test free with one element
+        // Test free with one element
         list = dpl_create();
         dpl_insert_at_index(list, 'A', 0);
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
         
-        // TODO : Test free with multiple element
+        //: Test free with multiple element
 	list = dpl_create();
         dpl_insert_at_index(list, 'A', 0);
         dpl_insert_at_index(list, 'A', 1);
         dpl_insert_at_index(list, 'A', 1);
+        dpl_insert_at_index(list, 'A', 1);
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
-        
-        // check if size works
-
     }
 END_TEST
 
 START_TEST(test_ListInsertAtIndexListNULL)
     {
+        dplist_t* result;
         // Test inserting at index -1
-        dplist_t* result = dpl_insert_at_index(NULL, 'A', -1);
+        result = dpl_insert_at_index(NULL, 'A', -1);
         ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
         // TODO : Test inserting at index 0
-
+        result = dpl_insert_at_index(NULL, 'A', 0);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
         // TODO : Test inserting at index 99
+	result = dpl_insert_at_index(NULL, 'A', 99);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
     }
 END_TEST
 
 START_TEST(test_ListInsertAtIndexListEmpty)
 {
+    dplist_t* list;
+    dplist_t* result;
     // Test inserting at index -1
-    dplist_t *list = dpl_create();
-    dplist_t *result = dpl_insert_at_index(list, 'A', -1);
-    ck_assert_msg(dpl_size(result) == 1, "Failure: expected list to have size of 1, got a size of %d",
-                                         dpl_size(result));
+    list = dpl_create();
+    result = dpl_insert_at_index(list, 'A', -1);
+    ck_assert_msg(dpl_size(result) == 1, "Failure: expected list to have size of 1, got a size of %d",dpl_size(result));
     dpl_free(&list);
-    // TODO : Test inserting at index 0
+    result = NULL;
+    //Test inserting at index 0
+    list = dpl_create();
+    result = dpl_insert_at_index(list, 'A', 0);
+    ck_assert_msg(dpl_size(result) == 1, "Failure: expected list to have size of 1, got a size of %d",dpl_size(result));
+    dpl_free(&list);
+    result = NULL;
 
-    // TODO : Test inserting at index 99
+    // Test inserting at index 99
+    list = dpl_create();
+    result = dpl_insert_at_index(list, 'A', 99);
+    ck_assert_msg(dpl_size(result) == 1, "Failure: expected list to have size of 1, got a size of %d",dpl_size(result));
+    dpl_free(&list);
+    result = NULL;
 }
 END_TEST
 
-//START_TEST(test_nameOfYourTest)
-//  Add other testcases here...
-//END_TEST
+START_TEST(test_updateSizeOfHeader)
+    {
+    	dplist_t* list;
+        // Test size with 0 elements 
+	list = dpl_create();
+        ck_assert_msg (dpl_size(list) == 0, "Failure:expected list to have size of 0, got a size of %d",dpl_size(list));
+        dpl_free(&list);
+        // Test size with 3 elements
+        list = dpl_create();
+        dpl_insert_at_index(list, 'A', 0);
+        dpl_insert_at_index(list, 'A', 0);
+        dpl_insert_at_index(list, 'A', 0);
+        ck_assert_msg (dpl_size(list) == 3, "Failure:expected list to have size of 3, got a size of %d",dpl_size(list));
+        dpl_free(&list);
+    }
+END_TEST
+
+START_TEST(test_removeNode)
+    {
+    	dplist_t* list;
+    	dplist_t* result;
+    	
+    	// Test list NULL
+    	list = NULL;
+        result = dpl_remove_at_index(list,0);
+        ck_assert_msg(result == NULL, "Failure: expected result to be NULL");	
+    	// Test remove elemement from empty list 
+    	list = dpl_create();
+        result= dpl_remove_at_index(list,0);
+        ck_assert_msg(result == list, "Failure: expected both pointer to point at the header");
+        free(list);
+        // Test remove element at index  0
+        // Test remove element at index in the middle 
+        // Test remove element at index in the end
+	
+    }
+END_TEST
 
 int main(void) {
     Suite *s1 = suite_create("LIST_EX1");
     TCase *tc1_1 = tcase_create("Core");
     SRunner *sr = srunner_create(s1);
     int nf;
-
     suite_add_tcase(s1, tc1_1);
-    tcase_add_checked_fixture(tc1_1, setup, teardown);
-    tcase_add_test(tc1_1, test_ListFree);
-    tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
-    tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
-    // Add other tests here...
     
-
+    //tcase_add_checked_fixture(tc1_1, setup, teardown);
+    //tcase_add_test(tc1_1, test_ListFree);
+    //tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
+    //tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
+    //tcase_add_test(tc1_1, test_updateSizeOfHeader);
+     tcase_add_test(tc1_1, test_removeNode);
+   
+    
     srunner_run_all(sr, CK_VERBOSE);
 
     nf = srunner_ntests_failed(sr);

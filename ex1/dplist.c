@@ -49,48 +49,33 @@ struct dplist {
     // more fields will be added later
 };
 
-dplist_t *dpl_create() {
+dplist_t* dpl_create() {
     dplist_t *list;
     list = malloc(sizeof(struct dplist));
     DPLIST_ERR_HANDLER(list == NULL, DPLIST_MEMORY_ERROR);
     list->head = NULL;
     list->size = 0;
-    // pointer drawing breakpoint
     return list;
 }
 
 void dpl_free(dplist_t** list) {
 	if ( *list !=NULL){	
-
-		if((*list)->head == NULL){
-			free(*list);
-			*list = NULL;
-		}
-		else{
-			dplist_node_t* dummy;//assign a place in the heap to the dummy, so you do not loose it. 
-			
-			for (dummy = (*list)->head ; dummy->next != NULL; dummy = dummy->next) {
-        			
-        		}
-    
-			
-			if((*list)->head->prev ==NULL)
-			{
-				free((*list)->head);
-				free(*list);
-				*list = NULL;
+		if ((*list)->size > 0){
+			dplist_node_t* dummy;
+			dplist_node_t* oldDummy;
+			dummy = (*list)->head;
+			while(dummy->next != NULL){		
+				oldDummy = dummy; 
+				dummy = dummy -> next;
+				free(oldDummy);
+				oldDummy  = NULL;
 			}
-		
+			free(dummy);
+			dummy = NULL;
 		}
-	} 
-	
-	dplist_node_t *dummy;
-	DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
-   	if (list->head == NULL) return NULL;
-    	for (dummy = list->head, count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
-        if (count >= index) return dummy;
-    	}
-    	return dummy;
+		free(*list);
+		*list = NULL;
+	}		
 }
 
 /* Important note: to implement any list manipulation operator (insert, append, delete, sort, ...), always be aware of the following cases:
@@ -146,9 +131,35 @@ dplist_t* dpl_insert_at_index (dplist_t* list, element_t element, int index) {
     return list;
 }
 
-dplist_t* dpl_remove_at_index (dplist_t *list, int index) {
+dplist_t* dpl_remove_at_index (dplist_t* list, int index) {
 
-    //TODO: add your code here
+/*
+	
+	if ( list !=NULL || list->head !=NULL ){
+	
+		
+		if ((*list)->size > 0){
+			dplist_node_t* dummy;
+			dplist_node_t* oldDummy;
+			dummy = (*list)->head;
+			while(dummy->next != NULL){		
+				oldDummy = dummy; 
+				dummy = dummy -> next;
+				free(oldDummy);
+				oldDummy  = NULL;
+			}
+			free(dummy);
+			dummy = NULL;
+		}
+		free(*list);
+		*list = NULL;
+		
+	}
+	*/
+	
+	return list;
+
+    
 
 }
 
@@ -160,7 +171,7 @@ int dpl_size (dplist_t* list) {
 	else return -1;
 }
 
-dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
+dplist_node_t* dpl_get_reference_at_index(dplist_t *list, int index) {
     int count;
     dplist_node_t *dummy;
     DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);

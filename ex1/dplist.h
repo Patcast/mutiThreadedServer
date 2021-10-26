@@ -30,7 +30,7 @@ dplist_t *dpl_create();
  * - '*list' must be set to NULL.
  * \param list a double pointer to the list
  */
-void dpl_free(dplist_t **list);
+void dpl_free(dplist_t** list);
 
 /** Returns the number of elements in the list.
  * - If 'list' is is NULL, -1 is returned.
@@ -61,7 +61,7 @@ dplist_t *dpl_insert_at_index(dplist_t *list, element_t element, int index);
  * \param index the position at which the node should be removed from the list
  * \return a pointer to the list or NULL
  */
-dplist_t *dpl_remove_at_index(dplist_t *list, int index);
+dplist_t* dpl_remove_at_index(dplist_t* list, int index);
 
 /** Returns a reference to the list node with index 'index' in the list.
  * - If 'index' is 0 or negative, a reference to the first list node is returned.
