@@ -1,10 +1,11 @@
+.DEFAULT_GOAL := testValgrind
 HEADERS=dplist.h
 SOURCE=dplist.c
 EXE=build/dplist
 
 FLAGS = -std=c11 -Werror -lm $(shell pkg-config --cflags --libs check)
 
-test : dplist.c dplist_test.c
+test: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
@@ -15,7 +16,19 @@ test : dplist.c dplist_test.c
 	@echo -e '*************************'
 	./build/dplist_test
 
-testGdb : dplist.c dplist_test.c
+
+testValgrind: dplist.c dplist_test.c
+	@echo -e '\n*******************************'
+	@echo -e '*** Compiling for UNIT TEST ***'
+	@echo -e '*******************************'
+	mkdir -p build
+	gcc dplist.c dplist_test.c -o build/dplist_test $(FLAGS)
+	@echo -e '\n*************************'
+	@echo -e '*** Running UNIT TEST ***'
+	@echo -e '*************************'
+	export CK_FORK=no ; valgrind ./build/dplist_test
+
+testGdb: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
@@ -26,7 +39,7 @@ testGdb : dplist.c dplist_test.c
 	@echo -e '*************************'
 	export CK_FORK=no ; gdb -q -tui ./build/dplist_test
 
-testDdd : dplist.c dplist_test.c
+testDdd: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'

@@ -27,7 +27,20 @@ START_TEST(test_ListFree)
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
         // TODO : Test free with one element
+        list = dpl_create();
+        dpl_insert_at_index(list, 'A', 0);
+        dpl_free(&list);
+        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+        
         // TODO : Test free with multiple element
+	list = dpl_create();
+        dpl_insert_at_index(list, 'A', 0);
+        dpl_insert_at_index(list, 'A', 1);
+        dpl_insert_at_index(list, 'A', 1);
+        dpl_free(&list);
+        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+        
+        // check if size works
 
     }
 END_TEST
@@ -35,7 +48,7 @@ END_TEST
 START_TEST(test_ListInsertAtIndexListNULL)
     {
         // Test inserting at index -1
-        dplist_t *result = dpl_insert_at_index(NULL, 'A', -1);
+        dplist_t* result = dpl_insert_at_index(NULL, 'A', -1);
         ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
         // TODO : Test inserting at index 0
 

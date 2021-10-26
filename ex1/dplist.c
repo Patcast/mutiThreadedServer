@@ -60,16 +60,37 @@ dplist_t *dpl_create() {
 }
 
 void dpl_free(dplist_t** list) {
-	if ( *list !=NULL){
+	if ( *list !=NULL){	
+
 		if((*list)->head == NULL){
 			free(*list);
 			*list = NULL;
 		}
-	
-	
-	} 
+		else{
+			dplist_node_t* dummy;//assign a place in the heap to the dummy, so you do not loose it. 
+			
+			for (dummy = (*list)->head ; dummy->next != NULL; dummy = dummy->next) {
+        			
+        		}
     
-
+			
+			if((*list)->head->prev ==NULL)
+			{
+				free((*list)->head);
+				free(*list);
+				*list = NULL;
+			}
+		
+		}
+	} 
+	
+	dplist_node_t *dummy;
+	DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
+   	if (list->head == NULL) return NULL;
+    	for (dummy = list->head, count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
+        if (count >= index) return dummy;
+    	}
+    	return dummy;
 }
 
 /* Important note: to implement any list manipulation operator (insert, append, delete, sort, ...), always be aware of the following cases:
@@ -80,7 +101,7 @@ void dpl_free(dplist_t** list) {
  * ALWAYS check that you implementation works correctly in all these cases (check this on paper with list representation drawings!)
  **/
 
-dplist_t* dpl_insert_at_index (dplist_t *list, element_t element, int index) {
+dplist_t* dpl_insert_at_index (dplist_t* list, element_t element, int index) {
     dplist_node_t *ref_at_index, *list_node;
     if (list == NULL) return NULL;
     list_node = malloc(sizeof(dplist_node_t));
@@ -132,10 +153,11 @@ dplist_t* dpl_remove_at_index (dplist_t *list, int index) {
 }
 
 int dpl_size (dplist_t* list) {
-	/*if (list->size != NULL) return list->size;
-	else */
 	
-	return -1;
+	if (list != NULL) {
+		return list-> size; // I assume that all dplist_t have a defined size.
+	}
+	else return -1;
 }
 
 dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
