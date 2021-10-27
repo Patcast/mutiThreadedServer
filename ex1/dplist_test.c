@@ -120,13 +120,69 @@ START_TEST(test_removeNode)
          dpl_insert_at_index(list, 'A', 1);
          dpl_insert_at_index(list, 'B', 2);
          dpl_insert_at_index(list, 'C', 3);
-         result= dpl_remove_at_index(list,1);
+         result= dpl_remove_at_index(list,-19);
          dpl_free(&list);
           
-  
         // Test remove element at index in the middle 
         // Test remove element at index in the end
 	
+    }
+END_TEST
+
+START_TEST(test_getElementAtIndex)
+    {
+    	dplist_t* list;
+    	element_t elementOut;
+    	
+    	// Test list NULL
+    	list = NULL;
+        elementOut = dpl_get_element_at_index(list,2);
+        ck_assert_msg(elementOut == 0, "Failure: expected result to be NULL");
+        // Test list is empty 
+    	list = dpl_create();
+        elementOut = dpl_get_element_at_index(list,2);
+        ck_assert_msg(elementOut == 0, "Failure: expected result to be NULL");
+        
+         // Test list is empty 
+    	list = dpl_create();
+    	dpl_insert_at_index(list, 'A', 1);
+         dpl_insert_at_index(list, 'B', 2);
+         dpl_insert_at_index(list, 'C', 3);
+        elementOut = dpl_get_element_at_index(list,2);
+        ck_assert_msg(elementOut == 'C', "Failure: expected result to be NULL");
+   
+        dpl_free(&list);
+       
+    }
+END_TEST
+
+
+START_TEST(test_findFirst)
+    {
+    	dplist_t* list;
+    	int  index;
+    	/*
+    	// Test list NULL
+    	list = NULL;
+        index = dpl_get_index_of_element(list,'A');
+        ck_assert_msg(index == -1, "Failure: expected result to be NULL");
+        // Test list is empty 
+    	list = dpl_create();
+	index = dpl_get_index_of_element(list,'A');
+        ck_assert_msg(index == -1, "Failure: expected result to be NULL");
+        */
+         // Test find Element 
+        list = dpl_create();
+    	dpl_insert_at_index(list, 'A', 1);
+	dpl_insert_at_index(list, 'B', 2);
+	dpl_insert_at_index(list, 'C', 3);
+	index = dpl_get_index_of_element(list,'P');
+	ck_assert_msg(index == 0, "Failure: expected result to be NULL");
+        
+        
+        
+        dpl_free(&list);
+       
     }
 END_TEST
 
@@ -142,7 +198,10 @@ int main(void) {
     //tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
     //tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
     //tcase_add_test(tc1_1, test_updateSizeOfHeader);
-    tcase_add_test(tc1_1, test_removeNode);
+    //tcase_add_test(tc1_1, test_removeNode);
+    //tcase_add_test(tc1_1, test_getElementAtIndex);
+    tcase_add_test(tc1_1, test_findFirst);
+    
    
     
     srunner_run_all(sr, CK_VERBOSE);

@@ -133,11 +133,11 @@ dplist_t* dpl_insert_at_index (dplist_t* list, element_t element, int index) {
 
 dplist_t* dpl_remove_at_index (dplist_t* list, int index) {
 	if ( list !=NULL){
-		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); //
+		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); 
 		
 		if (dummy !=NULL){
-			
-			if (dummy->prev == NULL){ // remove index 0 
+			// list is not empty 
+			if (dummy->prev == NULL){ 
 				if (dummy->next == NULL)list->head = NULL;	
 				else list->head = dummy->next;	
 			}
@@ -163,27 +163,40 @@ int dpl_size (dplist_t* list) {
 	else return -1;
 }
 
-dplist_node_t*  dpl_get_reference_at_index(dplist_t *list, int index) {
+dplist_node_t*  dpl_get_reference_at_index(dplist_t* list, int index) {
     int count;
     dplist_node_t *dummy;
     DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
+    if (list == NULL) return NULL;
     if (list->head == NULL) return NULL;
+    if (index <0 ) index =0; 
     for (dummy = list->head, count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
         if (count >= index) return dummy;
     }
     return dummy;
 }
 
-element_t dpl_get_element_at_index(dplist_t *list, int index) {
-
-    //TODO: add your code here
-
+element_t dpl_get_element_at_index(dplist_t *list, int index) {	
+	element_t element = 0;
+	if ( list !=NULL){
+		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); 
+		if (dummy !=NULL) element = dummy-> element;
+	}
+	return element;
 }
 
 int dpl_get_index_of_element(dplist_t *list, element_t element) {
-
-    //TODO: add your code here
-
+	
+	int index = -1;
+	
+	dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 
+		
+	if (dummy !=NULL){
+		for (int count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
+        	if (element == dummy -> element) return count;
+    		}
+	}	
+    	return index;
 }
 
 

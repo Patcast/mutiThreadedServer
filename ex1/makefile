@@ -26,7 +26,7 @@ testValgrind: dplist.c dplist_test.c
 	@echo -e '\n*************************'
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
-	@export CK_FORK=no ; valgrind -q ./build/dplist_test
+	@export CK_FORK=no ; valgrind ./build/dplist_test
 
 testGdb: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
