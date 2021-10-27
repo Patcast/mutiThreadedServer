@@ -108,13 +108,22 @@ START_TEST(test_removeNode)
     	// Test list NULL
     	list = NULL;
         result = dpl_remove_at_index(list,0);
-        ck_assert_msg(result == NULL, "Failure: expected result to be NULL");	
-    	// Test remove elemement from empty list 
+        ck_assert_msg(result == NULL, "Failure: expected result to be NULL");
+        // Test remove elemement from empty list 
     	list = dpl_create();
         result= dpl_remove_at_index(list,0);
         ck_assert_msg(result == list, "Failure: expected both pointer to point at the header");
-        free(list);
-        // Test remove element at index  0
+        dpl_free(&list);	
+        
+          // Test remove element at index  0 with multiple elements
+         list = dpl_create();
+         dpl_insert_at_index(list, 'A', 1);
+         dpl_insert_at_index(list, 'B', 2);
+         dpl_insert_at_index(list, 'C', 3);
+         result= dpl_remove_at_index(list,1);
+         dpl_free(&list);
+          
+  
         // Test remove element at index in the middle 
         // Test remove element at index in the end
 	
@@ -133,7 +142,7 @@ int main(void) {
     //tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
     //tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
     //tcase_add_test(tc1_1, test_updateSizeOfHeader);
-     tcase_add_test(tc1_1, test_removeNode);
+    tcase_add_test(tc1_1, test_removeNode);
    
     
     srunner_run_all(sr, CK_VERBOSE);

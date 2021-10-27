@@ -21,12 +21,12 @@ testValgrind: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
-	mkdir -p build
-	gcc dplist.c dplist_test.c -o build/dplist_test $(FLAGS)
+	@mkdir -p build
+	@gcc dplist.c dplist_test.c -o build/dplist_test $(FLAGS)
 	@echo -e '\n*************************'
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
-	export CK_FORK=no ; valgrind ./build/dplist_test
+	@export CK_FORK=no ; valgrind -q ./build/dplist_test
 
 testGdb: dplist.c dplist_test.c
 	@echo -e '\n*******************************'

@@ -44,7 +44,7 @@ struct dplist_node {
 };
 
 struct dplist {
-    dplist_node_t *head;
+    dplist_node_t* head;
     int size;
     // more fields will be added later
 };
@@ -132,35 +132,27 @@ dplist_t* dpl_insert_at_index (dplist_t* list, element_t element, int index) {
 }
 
 dplist_t* dpl_remove_at_index (dplist_t* list, int index) {
-
-/*
-	
-	if ( list !=NULL || list->head !=NULL ){
-	
+	if ( list !=NULL){
+		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); //
 		
-		if ((*list)->size > 0){
-			dplist_node_t* dummy;
-			dplist_node_t* oldDummy;
-			dummy = (*list)->head;
-			while(dummy->next != NULL){		
-				oldDummy = dummy; 
-				dummy = dummy -> next;
-				free(oldDummy);
-				oldDummy  = NULL;
+		if (dummy !=NULL){
+			
+			if (dummy->prev == NULL){ // remove index 0 
+				if (dummy->next == NULL)list->head = NULL;	
+				else list->head = dummy->next;	
 			}
+			else if (dummy->next == NULL) dummy->prev->next = NULL;	
+			
+			else{
+				dummy->prev->next = dummy -> next;
+				dummy->next->prev = dummy -> prev;
+			}
+			
 			free(dummy);
-			dummy = NULL;
+			list->size --;	
 		}
-		free(*list);
-		*list = NULL;
-		
 	}
-	*/
-	
-	return list;
-
-    
-
+	return list;	    
 }
 
 int dpl_size (dplist_t* list) {
@@ -171,7 +163,7 @@ int dpl_size (dplist_t* list) {
 	else return -1;
 }
 
-dplist_node_t* dpl_get_reference_at_index(dplist_t *list, int index) {
+dplist_node_t*  dpl_get_reference_at_index(dplist_t *list, int index) {
     int count;
     dplist_node_t *dummy;
     DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
