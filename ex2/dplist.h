@@ -5,7 +5,7 @@
 #ifndef _DPLIST_H_
 #define _DPLIST_H_
 
-typedef char* element_t;
+typedef char element_t;
 
 /**
  * dplist_t is a struct containing at least a head pointer to the start of the list;
@@ -22,7 +22,7 @@ typedef struct dplist_node dplist_node_t;
 /** Create and allocate memory for a new list
  * \return a pointer to a newly-allocated and initialized list.
  */
-dplist_t *dpl_create();
+dplist_t* dpl_create(element_t* (*createCharElement)(element_t inputChar),void (*deleteCharElement) (element_t* ptr)); //client must pass two methods create and delete. 
 
 /** Deletes all elements in the list
  * - Every list node of the list needs to be deleted. (free memory)
