@@ -20,16 +20,18 @@ void setup(void) {
 void teardown(void) {
     // Implement post-test teardown
 }
-START_TEST(test_create)
+/* START_TEST(test_create)
     {
         // Test free NULL
         dplist_t* list = NULL;
         list = dpl_create(&createPtrToData,&deleteData);
         dpl_insert_at_index(list, 'A', 0);
+        dpl_insert_at_index(list, 'B', 0);
+        dpl_insert_at_index(list, 'C', 0);
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
     }
-END_TEST
+END_TEST */
 
 /* START_TEST(test_ListFree)
     {
@@ -39,17 +41,17 @@ END_TEST
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
 
         // Test free empty list
-        list = dpl_create();
+        list = dpl_create(&createPtrToData,&deleteData);
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
         // Test free with one element
-        list = dpl_create();
+        list = dpl_create(&createPtrToData,&deleteData);
         dpl_insert_at_index(list, 'A', 0);
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
         
         //: Test free with multiple element
-	list = dpl_create();
+        list = dpl_create(&createPtrToData,&deleteData);
         dpl_insert_at_index(list, 'A', 0);
         dpl_insert_at_index(list, 'A', 1);
         dpl_insert_at_index(list, 'A', 1);
@@ -70,27 +72,27 @@ END_TEST */
 	result = dpl_insert_at_index(NULL, 'A', 99);
         ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
     }
-END_TEST
- */
-/* START_TEST(test_ListInsertAtIndexListEmpty)
+END_TEST */
+/* 
+START_TEST(test_ListInsertAtIndexListEmpty)
 {
     dplist_t* list;
     dplist_t* result;
     // Test inserting at index -1
-    list = dpl_create();
+    list = dpl_create(&createPtrToData,&deleteData);
     result = dpl_insert_at_index(list, 'A', -1);
     ck_assert_msg(dpl_size(result) == 1, "Failure: expected list to have size of 1, got a size of %d",dpl_size(result));
     dpl_free(&list);
     result = NULL;
     //Test inserting at index 0
-    list = dpl_create();
+    list = dpl_create(&createPtrToData,&deleteData);
     result = dpl_insert_at_index(list, 'A', 0);
     ck_assert_msg(dpl_size(result) == 1, "Failure: expected list to have size of 1, got a size of %d",dpl_size(result));
     dpl_free(&list);
     result = NULL;
 
     // Test inserting at index 99
-    list = dpl_create();
+    list = dpl_create(&createPtrToData,&deleteData);
     result = dpl_insert_at_index(list, 'A', 99);
     ck_assert_msg(dpl_size(result) == 1, "Failure: expected list to have size of 1, got a size of %d",dpl_size(result));
     dpl_free(&list);
@@ -102,11 +104,11 @@ END_TEST */
     {
     	dplist_t* list;
         // Test size with 0 elements 
-	list = dpl_create();
+	    list = dpl_create(&createPtrToData,&deleteData);
         ck_assert_msg (dpl_size(list) == 0, "Failure:expected list to have size of 0, got a size of %d",dpl_size(list));
         dpl_free(&list);
         // Test size with 3 elements
-        list = dpl_create();
+	    list = dpl_create(&createPtrToData,&deleteData);
         dpl_insert_at_index(list, 'A', 0);
         dpl_insert_at_index(list, 'A', 0);
         dpl_insert_at_index(list, 'A', 0);
@@ -125,13 +127,13 @@ END_TEST */
         result = dpl_remove_at_index(list,0);
         ck_assert_msg(result == NULL, "Failure: expected result to be NULL");
         // Test remove elemement from empty list 
-    	list = dpl_create();
+	    list = dpl_create(&createPtrToData,&deleteData);
         result= dpl_remove_at_index(list,0);
         ck_assert_msg(result == list, "Failure: expected both pointer to point at the header");
         dpl_free(&list);	
         
           // Test remove element at index  0 with multiple elements
-         list = dpl_create();
+	    list = dpl_create(&createPtrToData,&deleteData);
          dpl_insert_at_index(list, 'A', 1);
          dpl_insert_at_index(list, 'B', 2);
          dpl_insert_at_index(list, 'C', 3);
@@ -143,33 +145,36 @@ END_TEST */
 	
     }
 END_TEST */
-/* 
+
 START_TEST(test_getElementAtIndex)
     {
     	dplist_t* list;
     	element_t elementOut;
-    	
+        dplist_node_t* node;
+    /* 	
     	// Test list NULL
     	list = NULL;
         elementOut = dpl_get_element_at_index(list,2);
         ck_assert_msg(elementOut == 0, "Failure: expected result to be NULL");
         // Test list is empty 
-    	list = dpl_create();
+	    list = dpl_create(&createPtrToData,&deleteData);
         elementOut = dpl_get_element_at_index(list,2);
         ck_assert_msg(elementOut == 0, "Failure: expected result to be NULL");
-        
+         */
          // Test list is empty 
-    	list = dpl_create();
+	    list = dpl_create(&createPtrToData,&deleteData);
     	dpl_insert_at_index(list, 'A', 1);
-         dpl_insert_at_index(list, 'B', 2);
-         dpl_insert_at_index(list, 'C', 3);
+        dpl_insert_at_index(list, 'B', 2);
+        dpl_insert_at_index(list, 'C', 3);
+        node = dpl_get_reference_at_index(list,0);
+        node = dpl_get_reference_at_index(list,1);
+        node = dpl_get_reference_at_index(list,2);
         elementOut = dpl_get_element_at_index(list,2);
         ck_assert_msg(elementOut == 'C', "Failure: expected result to be NULL");
-   
         dpl_free(&list);
        
     }
-END_TEST */
+END_TEST
 
 
 /* START_TEST(test_findFirst)
@@ -209,13 +214,13 @@ int main(void) {
     
     //tcase_add_checked_fixture(tc1_1, setup, teardown);
     //tcase_add_test(tc1_1, test_ListFree);
-    //tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
-    //tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
-    //tcase_add_test(tc1_1, test_updateSizeOfHeader);
+    // tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
+    // tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
+    // tcase_add_test(tc1_1, test_updateSizeOfHeader);
     //tcase_add_test(tc1_1, test_removeNode);
-    //tcase_add_test(tc1_1, test_getElementAtIndex);
+    tcase_add_test(tc1_1, test_getElementAtIndex);
     //tcase_add_test(tc1_1, test_findFirst);
-    tcase_add_test(tc1_1, test_create);
+    //tcase_add_test(tc1_1, test_create);
     
    
     
@@ -237,4 +242,4 @@ element_t* createPtrToData(element_t input){
 
 void deleteData (element_t* ptr){
     if(ptr!=NULL)free(ptr);
-}
+} 

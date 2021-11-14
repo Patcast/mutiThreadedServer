@@ -34,7 +34,6 @@
             assert(!(condition));                                       \
         } while(0)
 
-
 /*
  * The real definition of struct list / struct node
  */
@@ -70,13 +69,15 @@ void dpl_free(dplist_t** list) {
 			while(dummy->next != NULL){		
 				oldDummy = dummy; 
 				dummy = dummy -> next;
-				((*list)->deletePtr)(oldDummy->element);
-				free(oldDummy);
-				oldDummy  = NULL;
+				deleteNode(*list,oldDummy);
+				// ((*list)->deletePtr)(oldDummy->element);
+				// free(oldDummy);
+				// oldDummy  = NULL;
 			}
-			((*list)->deletePtr)(dummy->element);
-			free(dummy);
-			dummy = NULL;
+			deleteNode(*list,dummy);
+			// ((*list)->deletePtr)(dummy->element);
+			// free(dummy);
+			// dummy = NULL;
 		}
 		free(*list);
 		*list = NULL;
@@ -105,48 +106,38 @@ dplist_t* dpl_insert_at_index (dplist_t* list, element_t element, int index) {
         list_node->prev = NULL;
         list_node->next = NULL;
         list->head = list_node;
-        list->size = (list -> size) +1 ; /// maybe good to add it at the top 
-
-        // pointer drawing breakpoint
-    } else if (index <= 0) { // covers case 2
+    } 
+	else if (index <= 0) { // covers case 2
         list_node->prev = NULL;
         list_node->next = list->head;
         list->head->prev = list_node;
         list->head = list_node;
-        list->size = (list -> size) +1 ; /// maybe good to add it at the top 
-        // pointer drawing breakpoint
-    } else {
+    } 
+	else {
         ref_at_index = dpl_get_reference_at_index(list, index);
         assert(ref_at_index != NULL);
-        // pointer drawing breakpoint
         if (index < dpl_size(list)) { // covers case 4
             list_node->prev = ref_at_index->prev;
             list_node->next = ref_at_index;
             ref_at_index->prev->next = list_node;
-            ref_at_index->prev = list_node;
-            list->size = (list -> size) +1 ; /// maybe good to add it at the top 
-            // pointer drawing breakpoint
-        } else { // covers case 3
+            ref_at_index->prev = list_node;} 
+		else { // covers case 3
             assert(ref_at_index->next == NULL);
             list_node->next = NULL;
             list_node->prev = ref_at_index;
-            ref_at_index->next = list_node;
-            list->size = (list -> size) +1 ; /// maybe good to add it at the top 
-            // pointer drawing breakpoint
-        }
+            ref_at_index->next = list_node;}
     }
+	list->size = (list -> size) +1 ; /// maybe good to add it at the top 
     return list;
     
 }
 
 dplist_t* dpl_remove_at_index (dplist_t* list, int index) {
-/*
 	if ( list !=NULL){
 		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); 
 		
-		if (dummy !=NULL){
-			// list is not empty 
-			if (dummy->prev == NULL){ 
+		if (dummy !=NULL){// list is not empty 
+			if (dummy->prev == NULL){ // first node in the list 
 				if (dummy->next == NULL)list->head = NULL;	
 				else list->head = dummy->next;	
 			}
@@ -156,23 +147,17 @@ dplist_t* dpl_remove_at_index (dplist_t* list, int index) {
 				dummy->prev->next = dummy -> next;
 				dummy->next->prev = dummy -> prev;
 			}
-			
-			free(dummy);
+			deleteNode(list,dummy);
+			// (list->deletePtr)(dummy->element);
+			// free(dummy);
 			list->size --;	
 		}
 	}
-	return list;	
-
-
-*/
-	    
+	return list;	    
 }
 
 int dpl_size (dplist_t* list) {
-	
-	if (list != NULL) {
-		return list-> size; // I assume that all dplist_t have a defined size.
-	}
+	if (list != NULL) return list-> size;
 	else return -1;
 }
 
@@ -193,14 +178,14 @@ dplist_node_t*  dpl_get_reference_at_index(dplist_t* list, int index) {
 }
 
 element_t dpl_get_element_at_index(dplist_t *list, int index) {	
-/*
+
 	element_t element = 0;
 	if ( list !=NULL){
 		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); 
-		if (dummy !=NULL) element = dummy-> element;
+		if (dummy !=NULL) element = *(dummy-> element);
 	}
 	return element;
-	*/
+	
 }
 
 int dpl_get_index_of_element(dplist_t *list, element_t element) {
@@ -221,6 +206,15 @@ int dpl_get_index_of_element(dplist_t *list, element_t element) {
     	return index;
     	*/
 }
+void deleteNode (dplist_t* list,dplist_node_t* ptr){
+	if (ptr!=NULL){
+		if (ptr->element!=NULL && list->deletePtr != NULL){
+			(list->deletePtr)(ptr->element);
+		}
+		free(ptr);
+		ptr = NULL;
+	}
 
+}
 
 

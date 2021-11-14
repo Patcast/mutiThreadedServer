@@ -96,5 +96,9 @@ element_t dpl_get_element_at_index(dplist_t *list, int index);
  */
 int dpl_get_index_of_element(dplist_t *list, element_t element);
 
+/* Eareases from memory the node and the char that was allocated in the heap. */
+
+void deleteNode (dplist_t* list,dplist_node_t* ptr);
+
 #endif  //DPLIST_H_
 
