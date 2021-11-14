@@ -69,15 +69,8 @@ void dpl_free(dplist_t** list) {
 			while(dummy->next != NULL){		
 				oldDummy = dummy; 
 				dummy = dummy -> next;
-				deleteNode(*list,oldDummy);
-				// ((*list)->deletePtr)(oldDummy->element);
-				// free(oldDummy);
-				// oldDummy  = NULL;
-			}
-			deleteNode(*list,dummy);
-			// ((*list)->deletePtr)(dummy->element);
-			// free(dummy);
-			// dummy = NULL;
+				deleteNode(*list,oldDummy);}
+		deleteNode(*list,dummy);
 		}
 		free(*list);
 		*list = NULL;
@@ -148,8 +141,6 @@ dplist_t* dpl_remove_at_index (dplist_t* list, int index) {
 				dummy->next->prev = dummy -> prev;
 			}
 			deleteNode(list,dummy);
-			// (list->deletePtr)(dummy->element);
-			// free(dummy);
 			list->size --;	
 		}
 	}
@@ -189,22 +180,19 @@ element_t dpl_get_element_at_index(dplist_t *list, int index) {
 }
 
 int dpl_get_index_of_element(dplist_t *list, element_t element) {
-/*
-	
+
 	int index = -1;
-	
 	dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 
 		
 	if (dummy !=NULL){
 		for (int count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
-        		if (element == dummy -> element){
+        		if (element == *(dummy -> element)){
         			index = count;
         			break;
         		}
     		}
 	}	
     	return index;
-    	*/
 }
 void deleteNode (dplist_t* list,dplist_node_t* ptr){
 	if (ptr!=NULL){

@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := testValgrind
+.DEFAULT_GOAL := valgrind
 HEADERS=dplist.h
 SOURCE=dplist.c
 EXE=build/dplist
@@ -17,7 +17,7 @@ test: dplist.c dplist_test.c
 	./build/dplist_test
 
 
-testValgrind: dplist.c dplist_test.c
+valgrind: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
@@ -28,7 +28,18 @@ testValgrind: dplist.c dplist_test.c
 	@echo -e '*************************'
 	@export CK_FORK=no ; valgrind ./build/dplist_test
 
-testGdb: dplist.c dplist_test.c
+fullValgrind: dplist.c dplist_test.c
+	@echo -e '\n*******************************'
+	@echo -e '*** Compiling for UNIT TEST ***'
+	@echo -e '*******************************'
+	@mkdir -p build
+	@gcc -g dplist.c dplist_test.c -o build/dplist_test $(FLAGS)
+	@echo -e '\n*************************'
+	@echo -e '*** Running UNIT TEST ***'
+	@echo -e '*************************'
+	@export CK_FORK=no ; valgrind -s --leak-check=full --show-leak-kinds=all ./build/dplist_test
+
+gdb: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
@@ -39,7 +50,7 @@ testGdb: dplist.c dplist_test.c
 	@echo -e '*************************'
 	export CK_FORK=no ; gdb -q -tui ./build/dplist_test
 
-testDdd: dplist.c dplist_test.c
+ddd: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'

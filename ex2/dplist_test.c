@@ -134,24 +134,32 @@ END_TEST */
         
           // Test remove element at index  0 with multiple elements
 	    list = dpl_create(&createPtrToData,&deleteData);
-         dpl_insert_at_index(list, 'A', 1);
-         dpl_insert_at_index(list, 'B', 2);
-         dpl_insert_at_index(list, 'C', 3);
-         result= dpl_remove_at_index(list,-19);
-         dpl_free(&list);
+        dpl_insert_at_index(list, 'A', 1);
+        dpl_insert_at_index(list, 'B', 2);
+        dpl_insert_at_index(list, 'C', 3);
+        result= dpl_remove_at_index(list,-19);
+        ck_assert_msg(dpl_get_element_at_index(result,0) == 'B', "Failure, expected %c, but got %c",dpl_get_element_at_index(list,1),dpl_get_element_at_index(result,0));
+        dpl_free(&list);
           
         // Test remove element at index in the middle 
         // Test remove element at index in the end
+        list = dpl_create(&createPtrToData,&deleteData);
+        dpl_insert_at_index(list, 'A', 1);
+        dpl_insert_at_index(list, 'B', 2);
+        dpl_insert_at_index(list, 'C', 3);
+        result= dpl_remove_at_index(list,10);
+        ck_assert_msg (dpl_size(list) == 2, "Failure:expected list to have size of 3, got a size of %d",dpl_size(list));
+        ck_assert_msg(dpl_get_element_at_index(result,1) == 'B', "Failure, expected %c, but got %c",dpl_get_element_at_index(list,1),dpl_get_element_at_index(result,0));
+        dpl_free(&list);
 	
     }
 END_TEST */
-
-START_TEST(test_getElementAtIndex)
+/* START_TEST(test_getElementAtIndex)
     {
     	dplist_t* list;
     	element_t elementOut;
         dplist_node_t* node;
-    /* 	
+    	
     	// Test list NULL
     	list = NULL;
         elementOut = dpl_get_element_at_index(list,2);
@@ -160,7 +168,7 @@ START_TEST(test_getElementAtIndex)
 	    list = dpl_create(&createPtrToData,&deleteData);
         elementOut = dpl_get_element_at_index(list,2);
         ck_assert_msg(elementOut == 0, "Failure: expected result to be NULL");
-         */
+        
          // Test list is empty 
 	    list = dpl_create(&createPtrToData,&deleteData);
     	dpl_insert_at_index(list, 'A', 1);
@@ -174,10 +182,10 @@ START_TEST(test_getElementAtIndex)
         dpl_free(&list);
        
     }
-END_TEST
+END_TEST */
 
 
-/* START_TEST(test_findFirst)
+START_TEST(test_findFirst)
     {
     	dplist_t* list;
     	int  index;
@@ -187,23 +195,24 @@ END_TEST
         index = dpl_get_index_of_element(list,'A');
         ck_assert_msg(index == -1, "Failure: expected result to be NULL");
         // Test list is empty 
-    	list = dpl_create();
-	index = dpl_get_index_of_element(list,'A');
+    	list = dpl_create(&createPtrToData,&deleteData);
+	    index = dpl_get_index_of_element(list,'A');
         ck_assert_msg(index == -1, "Failure: expected result to be NULL");
+        dpl_free(&list);
         
          // Test find Element 
         
-        list = dpl_create();
+        list = dpl_create(&createPtrToData,&deleteData);
         dpl_insert_at_index(list, 'C', 0);
     	dpl_insert_at_index(list, 'A', 1);
-	dpl_insert_at_index(list, 'B', 2);
-	dpl_insert_at_index(list, 'C', 3);
-	index = dpl_get_index_of_element(list,'A');
-	ck_assert_msg(index == 1, "Failure:expected return value of 1, got %d",index);
+        dpl_insert_at_index(list, 'B', 2);
+        dpl_insert_at_index(list, 'C', 3);
+        index = dpl_get_index_of_element(list,'A');
+        ck_assert_msg(index == 1, "Failure:expected return value of 1, got %d",index);
         dpl_free(&list);
        
     }
-END_TEST */
+END_TEST
 
 int main(void) {
     Suite *s1 = suite_create("LIST_EX1");
@@ -218,8 +227,8 @@ int main(void) {
     // tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
     // tcase_add_test(tc1_1, test_updateSizeOfHeader);
     //tcase_add_test(tc1_1, test_removeNode);
-    tcase_add_test(tc1_1, test_getElementAtIndex);
-    //tcase_add_test(tc1_1, test_findFirst);
+    //tcase_add_test(tc1_1, test_getElementAtIndex);
+    tcase_add_test(tc1_1, test_findFirst);
     //tcase_add_test(tc1_1, test_create);
     
    
