@@ -22,7 +22,7 @@ typedef struct dplist_node dplist_node_t;
 /** Create and allocate memory for a new list
  * \return a pointer to a newly-allocated and initialized list.
  */
-dplist_t* dpl_create(element_t* (*createCharElement)(element_t inputChar),void (*deleteCharElement) (element_t* ptr)); //client must pass two methods create and delete. 
+dplist_t* dpl_create( element_t* (*createCharElement)(element_t inputPtr),void (*deleteCharElement) (element_t* ptrToData)); //client must pass two methods create and delete. 
 
 /** Deletes all elements in the list
  * - Every list node of the list needs to be deleted. (free memory)

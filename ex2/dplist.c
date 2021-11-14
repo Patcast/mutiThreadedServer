@@ -40,7 +40,7 @@
  */
 struct dplist_node {
     dplist_node_t *prev, *next;
-    element_t element;
+    element_t* element;
 };
 
 struct dplist {
@@ -50,7 +50,7 @@ struct dplist {
     void (* deletePtr) (element_t*);
 };
 
-dplist_t* dpl_create(element_t* (*createCharElement)(element_t inputChar),void (*deleteCharElement) (element_t* ptr)) {
+dplist_t* dpl_create( element_t* (*createCharElement)(element_t inputPtr),void (*deleteCharElement) (element_t* ptrToData)){
     dplist_t *list;
     list = malloc(sizeof(struct dplist));
     DPLIST_ERR_HANDLER(list == NULL, DPLIST_MEMORY_ERROR);
@@ -70,9 +70,11 @@ void dpl_free(dplist_t** list) {
 			while(dummy->next != NULL){		
 				oldDummy = dummy; 
 				dummy = dummy -> next;
+				((*list)->deletePtr)(oldDummy->element);
 				free(oldDummy);
 				oldDummy  = NULL;
 			}
+			((*list)->deletePtr)(dummy->element);
 			free(dummy);
 			dummy = NULL;
 		}
@@ -90,12 +92,13 @@ void dpl_free(dplist_t** list) {
  **/
 
 dplist_t* dpl_insert_at_index (dplist_t* list, element_t element, int index) {
-    dplist_node_t* ref_at_index;
-    dplist_node_t* list_node;
-    if (list == NULL) return NULL;
-    list_node = malloc(sizeof(dplist_node_t));
-    DPLIST_ERR_HANDLER(list_node == NULL, DPLIST_MEMORY_ERROR);
-    list_node->element = element;
+	dplist_node_t* ref_at_index;
+	dplist_node_t* list_node;
+
+	if (list == NULL) return NULL;
+	list_node = malloc(sizeof(dplist_node_t));
+	DPLIST_ERR_HANDLER(list_node == NULL, DPLIST_MEMORY_ERROR);
+	list_node->element = (*(list->createPtr))(element);
 
     // pointer drawing breakpoint
     if (list->head == NULL) { // covers case 1
@@ -133,9 +136,11 @@ dplist_t* dpl_insert_at_index (dplist_t* list, element_t element, int index) {
         }
     }
     return list;
+    
 }
 
 dplist_t* dpl_remove_at_index (dplist_t* list, int index) {
+/*
 	if ( list !=NULL){
 		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); 
 		
@@ -156,7 +161,11 @@ dplist_t* dpl_remove_at_index (dplist_t* list, int index) {
 			list->size --;	
 		}
 	}
-	return list;	    
+	return list;	
+
+
+*/
+	    
 }
 
 int dpl_size (dplist_t* list) {
@@ -184,15 +193,18 @@ dplist_node_t*  dpl_get_reference_at_index(dplist_t* list, int index) {
 }
 
 element_t dpl_get_element_at_index(dplist_t *list, int index) {	
+/*
 	element_t element = 0;
 	if ( list !=NULL){
 		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); 
 		if (dummy !=NULL) element = dummy-> element;
 	}
 	return element;
+	*/
 }
 
 int dpl_get_index_of_element(dplist_t *list, element_t element) {
+/*
 	
 	int index = -1;
 	
@@ -207,6 +219,7 @@ int dpl_get_index_of_element(dplist_t *list, element_t element) {
     		}
 	}	
     	return index;
+    	*/
 }
 
 
