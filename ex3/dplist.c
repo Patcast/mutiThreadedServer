@@ -164,13 +164,23 @@ void* dpl_get_element_at_index(dplist_t *list, int index) {
 	return ptrToData;
 }
 
-int dpl_get_index_of_element(dplist_t *list, void *element) {
+int dpl_get_index_of_element(dplist_t *list, void *element) {//no possible to return NULL if list is null, it returns -1.
 
-    //TODO: add your code here
-
+    int index = -1;
+	dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 
+		
+	if (dummy !=NULL && element!=NULL){//if list is null or empty this will be false. 
+            for (int count = 0; count < (list ->size); dummy = dummy->next, count++) {
+        		if ((list->element_compare)(element,(dummy->element))==0){
+        			index = count;
+        			return index;
+        		}
+    		}
+	}	
+    return index;
 }
 
-dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
+dplist_node_t* dpl_get_reference_at_index(dplist_t *list, int index) {
 
     //DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
     dplist_node_t* dummy = NULL;
@@ -186,9 +196,10 @@ dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
 }
 
 void* dpl_get_element_at_reference(dplist_t *list, dplist_node_t* reference) {
-
-    //TODO: add your code here
-
+        void* referenceElement  = NULL;
+        int index = dpl_get_index_of_element(list,reference ->element);
+        if(index!= -1) referenceElement = reference->element;
+        return referenceElement;
 }
 void deleteNode (dplist_t* list,dplist_node_t* dummy,bool deleteElement){
 	if (dummy!=NULL){

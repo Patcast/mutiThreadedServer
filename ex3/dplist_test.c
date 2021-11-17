@@ -45,12 +45,6 @@ void * element_copy(void * element) {
     return (void *) copy;
 }
 
-/* void element_free(void ** element) {
-    free((((my_element_t*)*element))->name);
-    free(*element);
-    *element = NULL;
-} */
-
 void element_free(void** ptrElemenet) {/// you might wanna send the address of the pointer, so you can set it to zero
     free((((my_element_t*) *ptrElemenet))->ptrToData);
     free(*ptrElemenet);
@@ -68,8 +62,7 @@ void setup(void) {
 void teardown(void) {
     // Implement post-test teardown
 }
-/* 
-START_TEST(test_ListFree)
+/* START_TEST(test_ListFree)
     {
         // Test free NULL, don't use callback
         dplist_t* list;
@@ -147,8 +140,7 @@ START_TEST(test_ListFree)
 	
     }
 END_TEST */
-
-START_TEST(test_dpl_get_element_at_index)
+/* START_TEST(test_dpl_get_element_at_index)
     {
     	dplist_t* list; 
         void* element;   	
@@ -188,7 +180,127 @@ START_TEST(test_dpl_get_element_at_index)
         ck_assert_msg(storedChar2 == 'C', "Failure, expected 'B', but got %c",storedChar);
         dpl_free(&list,true);
 
-	
+    }
+END_TEST */
+/*START_TEST(test_get_index_of_element)
+    {
+    	dplist_t* list; 
+        int indexOut;
+     
+    	// // Test list NULL
+    	// list = NULL;
+        // indexOut = dpl_get_index_of_element(list,NULL);
+        // ck_assert_msg(indexOut == -1, "Failure: expected result to be NULL");
+        // // //Test remove elemement from empty list 
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // indexOut = dpl_get_index_of_element(list,NULL);
+        // ck_assert_msg(indexOut == -1, "Failure: expected result to be NULL");
+        // dpl_free(&list,true);	
+
+        // // // Test look for element with multiple elements
+        // void* data1 = createNewData(2,'A');
+        // void*data2 = createNewData(4,'B'); 
+        // void*data3 = createNewData(5,'C'); 
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // dpl_insert_at_index(list, data1, 1,false);
+        // dpl_insert_at_index(list, data2, 2,false);
+        // dpl_insert_at_index(list, data3, 3,false);
+        // indexOut = dpl_get_index_of_element(list,data1);
+        // ck_assert_msg(indexOut == 2, "Failure: expected result to be NULL");
+        // dpl_free(&list,true);
+
+        // // Test remove element at index in the end
+        // void* data4 = createNewData(2,'A');
+        // void* data5 = createNewData(4,'B'); 
+        // void* data6 = createNewData(5,'C'); 
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // dpl_insert_at_index(list, data4, 1,false);
+        // dpl_insert_at_index(list, data5, 2,false);
+        // dpl_insert_at_index(list, data6, 3,false);
+        // indexOut = dpl_get_index_of_element(list,data6);
+        // ck_assert_msg(indexOut == 2, "Failure: expected result to be 2, but got %d",indexOut);
+        // dpl_free(&list,true);
+        // // Test with multiple and NULL input element. 
+        // void* data7 = createNewData(2,'A');
+        // void* data8 = createNewData(4,'B'); 
+        // void* data9 = createNewData(5,'C'); 
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // dpl_insert_at_index(list, data7, 1,false);
+        // dpl_insert_at_index(list, data8, 2,false);
+        // dpl_insert_at_index(list, data9, 3,false);
+        // indexOut = dpl_get_index_of_element(list,NULL);
+        // ck_assert_msg(indexOut == -1, "Failure: expected result to be 2, but got %d",indexOut);
+        // dpl_free(&list,true);
+
+    }
+END_TEST
+ */
+
+START_TEST(test_get_element_at_reference)
+    {
+    	dplist_t* list; 
+        void* element; 
+         dplist_node_t* reference; 
+
+
+         // Test remove element at index  0 with multiple elements
+        void* data1 = createNewData(2,'A'); // It may crash if I add multiple nodes with same data.
+        void* data2 = createNewData(4,'B'); // It may crash if I add multiple nodes with same data.
+        void* data3 = createNewData(5,'C'); // It may crash if I add multiple nodes with same data.
+        list = dpl_create(element_copy, element_free, element_compare);
+        dpl_insert_at_index(list, data1, 1,false);
+        dpl_insert_at_index(list, data2, 2,false);
+        dpl_insert_at_index(list, data3, 3,false);
+        reference = dpl_get_reference_at_index(list,0);
+        element = dpl_get_element_at_reference(list,reference);
+        char storedChar = *(((my_element_t*)element)->ptrToData);
+        ck_assert_msg(storedChar == 'A', "Failure, expected 'B', but got %c",storedChar);
+        dpl_free(&list,true);	
+
+	    // Test list NULL
+        void* data4 = createNewData(2,'A'); // It may crash if I add multiple nodes with same data.
+        void* data5 = createNewData(4,'B'); // It may crash if I add multiple nodes with same data.
+        void* data6 = createNewData(5,'C'); // It may crash if I add multiple nodes with same data.
+        list = dpl_create(element_copy, element_free, element_compare);
+        dpl_insert_at_index(list, data4, 1,false);
+        dpl_insert_at_index(list, data5, 2,false);
+        dpl_insert_at_index(list, data6, 3,false);
+        reference = dpl_get_reference_at_index(list,0);
+        element = dpl_get_element_at_reference(NULL,reference);
+        ck_assert_msg(element == NULL, "Failure: expected result to be NULL");
+        dpl_free(&list,true);	
+        // //Test remove elemement from empty list 
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // element = dpl_get_element_at_index(list,0);
+        // ck_assert_msg(element == NULL, "Failure: expected result to be NULL");
+        // dpl_free(&list,true);	
+
+
+    	// // Test list NULL
+    	// list = NULL;
+        // element = dpl_get_element_at_index(list,0);
+        // ck_assert_msg(element == NULL, "Failure: expected result to be NULL");
+        // //Test remove elemement from empty list 
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // element = dpl_get_element_at_index(list,0);
+        // ck_assert_msg(element == NULL, "Failure: expected result to be NULL");
+        // dpl_free(&list,true);	
+
+       
+        // // Test remove element at index in the middle 
+        // // Test remove element at index in the end
+        // void* data4 = createNewData(2,'A'); // It may crash if I add multiple nodes with same data.
+        // void* data5 = createNewData(4,'B'); // It may crash if I add multiple nodes with same data.
+        // void* data6 = createNewData(5,'C'); // It may crash if I add multiple nodes with same data.
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // dpl_insert_at_index(list, data4, 1,false);
+        // dpl_insert_at_index(list, data5, 2,false);
+        // dpl_insert_at_index(list, data6, 3,false);
+        // element = dpl_get_element_at_index(list,10);
+        // char storedChar2 = *(((my_element_t*)element)->ptrToData);
+        // ck_assert_msg(storedChar2 == 'C', "Failure, expected 'B', but got %c",storedChar);
+        // dpl_free(&list,true);
+
     }
 END_TEST
 
@@ -200,16 +312,11 @@ int main(void) {
 
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
-    // tcase_add_test(tc1_1, test_ListFree);
-    // tcase_add_test(tc1_1, test_removeNode);
-    tcase_add_test(tc1_1, test_dpl_get_element_at_index);
-
-
-
+    //Tests here...
+    tcase_add_test(tc1_1, test_get_element_at_reference);
+    //
     srunner_run_all(sr, CK_VERBOSE);
-
     nf = srunner_ntests_failed(sr);
     srunner_free(sr);
-
     return nf == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
