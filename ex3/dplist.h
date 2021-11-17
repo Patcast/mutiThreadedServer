@@ -31,7 +31,7 @@ typedef struct dplist_node dplist_node_t;
  */
 dplist_t *dpl_create(
         void* (*element_copy)(void *element),
-        void (*element_free)(void *element),
+        void (*element_free)(void** element),
         int (*element_compare)(void *x, void *y)
 );
 

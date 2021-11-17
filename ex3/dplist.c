@@ -39,21 +39,21 @@
 
 struct dplist_node {
     dplist_node_t *prev, *next;
-    void *element;
+    void* element;
 };
 
 struct dplist {
     dplist_node_t* head;
     int size;
     void* (*element_copy)(void *src_element);
-    void (*element_free)(void *element);
+    void (*element_free)(void* *element);
     int (*element_compare)(void *x, void *y);
 };
 
 
 dplist_t *dpl_create(// callback functions
         void *(*element_copy)(void *src_element),
-        void (*element_free)(void *element),
+        void (*element_free)(void **element),
         int (*element_compare)(void *x, void *y)
 ) {
     dplist_t *list;
@@ -94,8 +94,6 @@ dplist_t *dpl_insert_at_index(dplist_t *list, void* element, int index, bool ins
 	DPLIST_ERR_HANDLER(list_node == NULL, DPLIST_MEMORY_ERROR);
     if(insert_copy&&element!=NULL) list_node->element = (list->element_copy)(element);
     else list_node->element = element;
-
-	//(*(list->createPtr))(element);
 
     if (list->head == NULL) { // covers case 1
         list_node->prev = NULL;
@@ -158,8 +156,12 @@ int dpl_size(dplist_t *list) {
 
 void* dpl_get_element_at_index(dplist_t *list, int index) {
 
-    //TODO: add your code here
-
+    void* ptrToData = NULL;
+	if ( list !=NULL){
+		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); 
+		if (dummy !=NULL) ptrToData = (dummy-> element);
+	}
+	return ptrToData;
 }
 
 int dpl_get_index_of_element(dplist_t *list, void *element) {
@@ -188,15 +190,14 @@ void* dpl_get_element_at_reference(dplist_t *list, dplist_node_t* reference) {
     //TODO: add your code here
 
 }
-void deleteNode (dplist_t* list,dplist_node_t* ptr,bool deleteElement){
-	if (ptr!=NULL){
-		if (ptr->element!=NULL && list->element_free != NULL){
-			if(deleteElement&& ptr->element!=NULL){
-                (list->element_free)(ptr->element);
-            }
-		}
-		free(ptr);
-		ptr = NULL;
+void deleteNode (dplist_t* list,dplist_node_t* dummy,bool deleteElement){
+	if (dummy!=NULL){
+		if ((dummy->element!=NULL && list->element_free != NULL)&&deleteElement){
+
+             (list->element_free)(&(dummy ->element));
+        }
+		free(dummy);
+		dummy = NULL;
 	}
 
 }

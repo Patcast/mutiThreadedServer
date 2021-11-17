@@ -12,11 +12,11 @@
 
 typedef struct {
     int id;
-    char* name;
+    char* ptrToData;
 } my_element_t;
 
 void* element_copy(void * element);
-void element_free(void* element);
+void element_free(void** element);
 /** Uses the property id to compare to my_element_t object.
  * \param x a pointer to the list
  * \param y a pointer to the list
@@ -30,25 +30,31 @@ void* createNewData(int id, char name);
 void* createNewData(int idInput, char charInput){
     my_element_t* data = malloc(sizeof (my_element_t));
     data ->id = idInput;
-    data ->name = malloc(sizeof (char));
-    *(data ->name )= charInput;
+    data ->ptrToData = malloc(sizeof (char));
+    *(data ->ptrToData )= charInput;
     return (void*) data;
 }
 
 void * element_copy(void * element) {
     my_element_t* copy = malloc(sizeof (my_element_t));
     char* new_name;
-    asprintf(&new_name,"%s",((my_element_t*)element)->name); 
+    asprintf(&new_name,"%s",((my_element_t*)element)->ptrToData); 
     assert(copy != NULL);
     copy->id = ((my_element_t*)element)->id;
-    copy->name = new_name;
+    copy->ptrToData = new_name;
     return (void *) copy;
 }
 
-void element_free(void* element) {
-    free((((my_element_t*)element))->name);
-    free(element);
-    element = NULL;
+/* void element_free(void ** element) {
+    free((((my_element_t*)*element))->name);
+    free(*element);
+    *element = NULL;
+} */
+
+void element_free(void** ptrElemenet) {/// you might wanna send the address of the pointer, so you can set it to zero
+    free((((my_element_t*) *ptrElemenet))->ptrToData);
+    free(*ptrElemenet);
+    *ptrElemenet = NULL;
 }
 
 int element_compare(void * x, void * y) {
@@ -104,11 +110,9 @@ START_TEST(test_ListFree)
     }
     END_TEST
  */
-START_TEST(test_removeNode)
+/* START_TEST(test_removeNode)
     {
-    	dplist_t* list;
-    	dplist_t* result;
-    	
+    	dplist_t* list;    	
     	// // Test list NULL
     	// list = NULL;
         // result = dpl_remove_at_index(list,0,false);
@@ -129,17 +133,61 @@ START_TEST(test_removeNode)
         // dpl_free(&list,true);
         // Test remove element at index in the middle 
         // Test remove element at index in the end
-         void* data1 = createNewData(2,'A'); // It may crash if I add multiple nodes with same data.
-        void* data2 = createNewData(4,'A'); // It may crash if I add multiple nodes with same data.
-        void* data3 = createNewData(5,'A'); // It may crash if I add multiple nodes with same data.
+        void* data1 = createNewData(2,'A'); // It may crash if I add multiple nodes with same data.
+        void* data2 = createNewData(4,'B'); // It may crash if I add multiple nodes with same data.
+        void* data3 = createNewData(5,'C'); // It may crash if I add multiple nodes with same data.
         list = dpl_create(element_copy, element_free, element_compare);
         dpl_insert_at_index(list, data1, 1,false);
         dpl_insert_at_index(list, data2, 2,false);
         dpl_insert_at_index(list, data3, 3,false);
-        result= dpl_remove_at_index(list,10,false);
+        list= dpl_remove_at_index(list,10,true);
         ck_assert_msg (dpl_size(list) == 2, "Failure:expected list to have size of 3, got a size of %d",dpl_size(list));
         //ck_assert_msg(dpl_get_element_at_index(result,1) == 'B', "Failure, expected %c, but got %c",dpl_get_element_at_index(list,1),dpl_get_element_at_index(result,0));
         dpl_free(&list,true);
+	
+    }
+END_TEST */
+
+START_TEST(test_dpl_get_element_at_index)
+    {
+    	dplist_t* list; 
+        void* element;   	
+    	// Test list NULL
+    	list = NULL;
+        element = dpl_get_element_at_index(list,0);
+        ck_assert_msg(element == NULL, "Failure: expected result to be NULL");
+        //Test remove elemement from empty list 
+        list = dpl_create(element_copy, element_free, element_compare);
+        element = dpl_get_element_at_index(list,0);
+        ck_assert_msg(element == NULL, "Failure: expected result to be NULL");
+        dpl_free(&list,true);	
+
+        // Test remove element at index  0 with multiple elements
+        void* data1 = createNewData(2,'A'); // It may crash if I add multiple nodes with same data.
+        void* data2 = createNewData(4,'B'); // It may crash if I add multiple nodes with same data.
+        void* data3 = createNewData(5,'C'); // It may crash if I add multiple nodes with same data.
+        list = dpl_create(element_copy, element_free, element_compare);
+        dpl_insert_at_index(list, data1, 1,false);
+        dpl_insert_at_index(list, data2, 2,false);
+        dpl_insert_at_index(list, data3, 3,false);
+        element = dpl_get_element_at_index(list,1);
+        char storedChar = *(((my_element_t*)element)->ptrToData);
+        ck_assert_msg(storedChar == 'B', "Failure, expected 'B', but got %c",storedChar);
+        dpl_free(&list,true);
+        // Test remove element at index in the middle 
+        // Test remove element at index in the end
+        void* data4 = createNewData(2,'A'); // It may crash if I add multiple nodes with same data.
+        void* data5 = createNewData(4,'B'); // It may crash if I add multiple nodes with same data.
+        void* data6 = createNewData(5,'C'); // It may crash if I add multiple nodes with same data.
+        list = dpl_create(element_copy, element_free, element_compare);
+        dpl_insert_at_index(list, data4, 1,false);
+        dpl_insert_at_index(list, data5, 2,false);
+        dpl_insert_at_index(list, data6, 3,false);
+        element = dpl_get_element_at_index(list,10);
+        char storedChar2 = *(((my_element_t*)element)->ptrToData);
+        ck_assert_msg(storedChar2 == 'C', "Failure, expected 'B', but got %c",storedChar);
+        dpl_free(&list,true);
+
 	
     }
 END_TEST
@@ -153,9 +201,10 @@ int main(void) {
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     // tcase_add_test(tc1_1, test_ListFree);
-    tcase_add_test(tc1_1, test_removeNode);
+    // tcase_add_test(tc1_1, test_removeNode);
+    tcase_add_test(tc1_1, test_dpl_get_element_at_index);
 
-    // Add other tests here...
+
 
     srunner_run_all(sr, CK_VERBOSE);
 
