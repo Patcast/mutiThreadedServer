@@ -236,7 +236,7 @@ END_TEST */
 END_TEST
  */
 
-START_TEST(test_get_element_at_reference)
+/* START_TEST(test_get_element_at_reference)
     {
     	dplist_t* list; 
         void* element; 
@@ -302,7 +302,7 @@ START_TEST(test_get_element_at_reference)
         // dpl_free(&list,true);
 
     }
-END_TEST
+END_TEST */
 
 int main(void) {
     Suite *s1 = suite_create("LIST_EX3");
@@ -313,7 +313,7 @@ int main(void) {
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     //Tests here...
-    tcase_add_test(tc1_1, test_get_element_at_reference);
+    // tcase_add_test(tc1_1, test_get_element_at_reference);
     //
     srunner_run_all(sr, CK_VERBOSE);
     nf = srunner_ntests_failed(sr);
