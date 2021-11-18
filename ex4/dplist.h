@@ -5,9 +5,9 @@
 #ifndef _DPLIST_H_
 #define _DPLIST_H_
 
-typedef enum {
-    false, true
-} bool; // or use C99 #include <stdbool.h>
+// typedef enum {
+//     false, true
+// } bool; // or use C99 #include <stdbool.h>
 
 /**
  * dplist_t is a struct containing at least a head pointer to the start of the list;
@@ -119,6 +119,11 @@ int dpl_get_index_of_element(dplist_t *list, void *element);
  * \return the element contained in the list node or NULL
  */
 void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference);
+
+void deleteNode (dplist_t* list,dplist_node_t* ptr,bool deleteElement);
+
+
+
 
 
 //*** HERE STARTS THE EXTRA SET OF OPERATORS ***//
