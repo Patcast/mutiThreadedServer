@@ -164,15 +164,18 @@ int dpl_size (dplist_t* list) {
 }
 
 dplist_node_t*  dpl_get_reference_at_index(dplist_t* list, int index) {
-    int count;
-    dplist_node_t *dummy;
-    DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
-    if (list == NULL) return NULL;
-    if (list->head == NULL) return NULL;
-    if (index <0 ) index =0; 
-    for (dummy = list->head, count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
-        if (count >= index) return dummy;
+    
+    //DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
+    dplist_node_t* dummy = NULL;
+     int count;
+    
+    if (list != NULL && list->head != NULL){
+    	if (index <0 ) index =0; 
+    	for (dummy = list->head, count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
+        	if (count >= index) return dummy;
+    	}
     }
+  
     return dummy;
 }
 
@@ -193,7 +196,10 @@ int dpl_get_index_of_element(dplist_t *list, element_t element) {
 		
 	if (dummy !=NULL){
 		for (int count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
-        	if (element == dummy -> element) return count;
+        		if (element == dummy -> element){
+        			index = count;
+        			break;
+        		}
     		}
 	}	
     	return index;

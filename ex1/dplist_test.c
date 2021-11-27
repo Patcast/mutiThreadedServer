@@ -14,6 +14,7 @@ void setup(void) {
 void teardown(void) {
     // Implement post-test teardown
 }
+
 START_TEST(test_ListFree)
     {
         // Test free NULL
@@ -41,6 +42,7 @@ START_TEST(test_ListFree)
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
     }
 END_TEST
+/*
 
 START_TEST(test_ListInsertAtIndexListNULL)
     {
@@ -48,10 +50,8 @@ START_TEST(test_ListInsertAtIndexListNULL)
         // Test inserting at index -1
         result = dpl_insert_at_index(NULL, 'A', -1);
         ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
-        // TODO : Test inserting at index 0
         result = dpl_insert_at_index(NULL, 'A', 0);
         ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
-        // TODO : Test inserting at index 99
 	result = dpl_insert_at_index(NULL, 'A', 99);
         ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
     }
@@ -161,7 +161,7 @@ START_TEST(test_findFirst)
     {
     	dplist_t* list;
     	int  index;
-    	/*
+    	
     	// Test list NULL
     	list = NULL;
         index = dpl_get_index_of_element(list,'A');
@@ -170,21 +170,21 @@ START_TEST(test_findFirst)
     	list = dpl_create();
 	index = dpl_get_index_of_element(list,'A');
         ck_assert_msg(index == -1, "Failure: expected result to be NULL");
-        */
+        
          // Test find Element 
+        
         list = dpl_create();
+        dpl_insert_at_index(list, 'C', 0);
     	dpl_insert_at_index(list, 'A', 1);
 	dpl_insert_at_index(list, 'B', 2);
 	dpl_insert_at_index(list, 'C', 3);
-	index = dpl_get_index_of_element(list,'P');
-	ck_assert_msg(index == 0, "Failure: expected result to be NULL");
-        
-        
-        
+	index = dpl_get_index_of_element(list,'A');
+	ck_assert_msg(index == 1, "Failure:expected return value of 1, got %d",index);
         dpl_free(&list);
        
     }
 END_TEST
+*/
 
 int main(void) {
     Suite *s1 = suite_create("LIST_EX1");
@@ -194,13 +194,13 @@ int main(void) {
     suite_add_tcase(s1, tc1_1);
     
     //tcase_add_checked_fixture(tc1_1, setup, teardown);
-    //tcase_add_test(tc1_1, test_ListFree);
+    tcase_add_test(tc1_1, test_ListFree);
     //tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
     //tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
     //tcase_add_test(tc1_1, test_updateSizeOfHeader);
     //tcase_add_test(tc1_1, test_removeNode);
     //tcase_add_test(tc1_1, test_getElementAtIndex);
-    tcase_add_test(tc1_1, test_findFirst);
+    //tcase_add_test(tc1_1, test_findFirst);
     
    
     
@@ -211,3 +211,6 @@ int main(void) {
 
     return nf == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+
+

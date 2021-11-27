@@ -22,11 +22,11 @@ valgrind: dplist.c dplist_test.c
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
 	@mkdir -p build
-	@gcc dplist.c dplist_test.c -o build/dplist_test $(FLAGS)
+	@gcc dplist.c dplist_test.c -g -o build/dplist_test $(FLAGS)
 	@echo -e '\n*************************'
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
-	@export CK_FORK=no ; valgrind ./build/dplist_test
+	@export CK_FORK=no ; valgrind -s ./build/dplist_test
 
 fullValgrind: dplist.c dplist_test.c
 	@echo -e '\n*******************************'
@@ -60,7 +60,8 @@ ddd: dplist.c dplist_test.c
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
 	export CK_FORK=no ; ddd ./build/dplist_test
-
+zip: dplist.c
+	zip lab4_ex4.zip dplist.c
 
 .PHONY : clean check
 

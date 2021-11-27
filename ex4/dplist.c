@@ -1,11 +1,12 @@
 /**
  * \author Patricio Adolfo Castillo Calderon
  */
-#include <stdbool.h>
+// #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include "dplist.h"
+
 
 /*
  * definition of error codes
@@ -37,6 +38,9 @@
  * The real definition of struct list / struct node
  */
 
+void deleteNode (dplist_t* list,dplist_node_t* ptr,bool deleteElement);
+
+
 struct dplist_node {
     dplist_node_t *prev, *next;
     void* element;
@@ -49,6 +53,7 @@ struct dplist {
     void (*element_free)(void* *element);
     int (*element_compare)(void *x, void *y);
 };
+
 
 
 dplist_t *dpl_create(// callback functions
@@ -125,7 +130,6 @@ dplist_t *dpl_insert_at_index(dplist_t *list, void* element, int index, bool ins
     
 
 }
-
 dplist_t* dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
     if ( list !=NULL){
 		dplist_node_t* dummy = dpl_get_reference_at_index(list,index); 
@@ -133,9 +137,12 @@ dplist_t* dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
 		if (dummy !=NULL){// list is not empty 
 			if (dummy->prev == NULL){ // first node in the list 
 				if (dummy->next == NULL)list->head = NULL;	
-				else list->head = dummy->next;	
+				else {
+                    list->head = dummy->next;
+                    dummy ->next ->prev = NULL;	
+                    }
 			}
-			else if (dummy->next == NULL) dummy->prev->next = NULL;	
+			else if (dummy->next == NULL) dummy->prev->next = NULL;	// this is the last element
 			
 			else{
 				dummy->prev->next = dummy -> next;
@@ -181,8 +188,6 @@ int dpl_get_index_of_element(dplist_t *list, void *element) {//no possible to re
 }
 
 dplist_node_t* dpl_get_reference_at_index(dplist_t *list, int index) {
-
-    //DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
     dplist_node_t* dummy = NULL;
      int count;
     
@@ -196,11 +201,23 @@ dplist_node_t* dpl_get_reference_at_index(dplist_t *list, int index) {
 }
 
 void* dpl_get_element_at_reference(dplist_t *list, dplist_node_t* reference) {
-        void* referenceElement  = NULL;
-        int index = dpl_get_index_of_element(list,reference ->element);
-        if(index!= -1) referenceElement = reference->element;
-        return referenceElement;
+     bool referenceExist = false;
+     if(list!=NULL&& reference != NULL){
+        if(list->size>0){
+            dplist_node_t* dummy = list->head;
+            for (int count = 0; count < (list ->size); dummy = dummy->next, count++) {
+                    if(dummy==reference){
+                        referenceExist=true;
+                        break;
+                        }
+       		}
+        }
+     }
+     if(referenceExist&&reference->element!=NULL)return  reference->element ;
+     else return NULL;
 }
+
+
 void deleteNode (dplist_t* list,dplist_node_t* dummy,bool deleteElement){
 	if (dummy!=NULL){
 		if ((dummy->element!=NULL && list->element_free != NULL)&&deleteElement){
@@ -208,24 +225,87 @@ void deleteNode (dplist_t* list,dplist_node_t* dummy,bool deleteElement){
              (list->element_free)(&(dummy ->element));
         }
 		free(dummy);
-		dummy = NULL;
 	}
 }
 
 //***** EXTRA MEHTHODS ********************************///
 
-dplist_node_t* dpl_get_first_reference(dplist_t *list){
-    return dpl_get_reference_at_index(list,0);      
-}
-dplist_node_t* dpl_get_last_reference(dplist_t *list){
-    int size = dpl_size(list);
-    
+// dplist_node_t* dpl_get_first_reference(dplist_t *list){
+//     return dpl_get_reference_at_index(list,0);      
+// }
+// dplist_node_t* dpl_get_last_reference(dplist_t *list){
+//     int size = dpl_size(list);
+//     if (size>0){
+//         dplist_node_t* ref = dpl_get_reference_at_index(list,size-1); 
+//         return ref;
+//     }
+//     else return NULL;
+// }
 
-    if (size>0){
-        dplist_node_t* ref = dpl_get_reference_at_index(list,size-1); 
-        return ref;
+// dplist_node_t* dpl_get_next_reference(dplist_t *list, dplist_node_t* reference){
+//     int index = dpl_get_index_of_reference(list,reference);
+//     if(index>=0)return reference->next;
+//     else return NULL;
+// }
+// dplist_node_t *dpl_get_previous_reference(dplist_t *list, dplist_node_t *reference){
+//     int index = dpl_get_index_of_reference(list,reference);
+//     if(index>=0)return reference->prev;
+//     else return NULL;
+// }
+// dplist_node_t *dpl_get_reference_of_element(dplist_t *list, void *element){
+//     dplist_node_t* node =NULL;
+//     if (element!=NULL){    
+//         dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 	
+//         if (dummy !=NULL){
+//                 for (int count = 0; count < (list ->size); dummy = dummy->next, count++) {
+//                     if ((list->element_compare)(element,(dummy->element))==0){
+//                         node = dummy;
+//                         break;
+//                     }
+//                 }
+//         }
+//     }
+//     return node;
+// }
 
-    }
-    else return NULL;
-}
+// int dpl_get_index_of_reference(dplist_t *list, dplist_node_t *reference){
+//     int index = -1;
+// 	dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 
+		
+// 	if (dummy != NULL && reference != NULL){ 
+//             for (int count = 0; count < (list ->size); dummy = dummy->next, count++) {
+//         		if (dummy == reference){
+//         			index = count;
+//         			return index;
+//         		}
+//     		}
+// 	}	
+//     return index;
+// }
+// // To be implemented later if needed...
+// //dplist_t *dpl_insert_sorted(dplist_t *list, void *element, bool insert_copy);
+// //dplist_t *dpl_insert_at_reference(dplist_t *list, void *element, dplist_node_t *reference, bool insert_copy);
+
+// dplist_t *dpl_remove_at_reference(dplist_t *list, dplist_node_t *reference, bool free_element){
+//     dplist_t* returnList = NULL;
+//     if (list!=NULL && reference!=NULL){
+//         returnList = list;
+//         int index = dpl_get_index_of_reference(list,reference);
+//         if (index>=0){
+//             dpl_remove_at_index(list,index,free_element);
+//         }
+//     }
+//     return returnList;
+// }
+// dplist_t *dpl_remove_element(dplist_t *list, void *element, bool free_element){
+//     dplist_t* returnList = NULL;
+//     if (list!=NULL && element!=NULL){
+//         returnList = list;
+//         int index = dpl_get_index_of_element(list,element);
+//         if (index>=0){
+//             dpl_remove_at_index(list,index,free_element);
+//         }
+//     }
+//     return returnList;
+// }
 

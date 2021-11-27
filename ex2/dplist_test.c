@@ -185,7 +185,7 @@ END_TEST */
 END_TEST */
 
 
-START_TEST(test_findFirst)
+/* START_TEST(test_findFirst)
     {
     	dplist_t* list;
     	int  index;
@@ -212,7 +212,7 @@ START_TEST(test_findFirst)
         dpl_free(&list);
        
     }
-END_TEST
+END_TEST */
 
 int main(void) {
     Suite *s1 = suite_create("LIST_EX1");
@@ -228,7 +228,7 @@ int main(void) {
     // tcase_add_test(tc1_1, test_updateSizeOfHeader);
     //tcase_add_test(tc1_1, test_removeNode);
     //tcase_add_test(tc1_1, test_getElementAtIndex);
-    tcase_add_test(tc1_1, test_findFirst);
+    // tcase_add_test(tc1_1, test_findFirst);
     //tcase_add_test(tc1_1, test_create);
     
    
