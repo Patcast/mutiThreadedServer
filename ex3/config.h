@@ -30,7 +30,7 @@ typedef struct {
     std_int_t idSensor;        
     std_int_t idTemp; 
     std_int_t avg; 
-    std_time_t ts
+    std_time_t ts;
 } data_element_t;
 
 
