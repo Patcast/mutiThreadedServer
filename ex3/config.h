@@ -29,8 +29,10 @@ typedef struct {
 typedef struct {
     std_int_t idSensor;        
     std_int_t idTemp; 
-    std_int_t avg; 
+    sensor_value_t avg; 
     std_time_t ts;
+    std_int_t numRecAdded;
+    sensor_value_t * ptrToRecords;
 } data_element_t;
 
 

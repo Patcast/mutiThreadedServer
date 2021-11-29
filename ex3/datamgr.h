@@ -27,12 +27,17 @@
 // __FILE__, __func__, __LINE__ -> are variables that are created by the compiler.  __VA_ARGS__ is any other argument(in this case seems to be an string).
 #define ERROR_HANDLER(condition, ...)    do {                       \
                       if (condition) {                              \
-                        printf("\nError: in %s - function %s at line %d: %s\n", __FILE__, __func__, __LINE__, __VA_ARGS__); \
+                        printf("\n\nError: in %s - function %s at line %d: %s\n\n", __FILE__, __func__, __LINE__, __VA_ARGS__); \
                         exit(EXIT_FAILURE);                         \
                       }                                             \
                     } while(0)
 
-/**
+/*-- manager error codes --*/
+enum err_code { ERR_NONE = 0, ERR_EMPTY, ERR_FULL, ERR_MEM, ERR_INIT, ERR_UNDEFINED,ERR_INVALID_SEN_ID};
+
+typedef enum err_code err_code_t;
+
+/**condition
  *  This method holds the core functionality of your datamgr. It takes in 2 file pointers to the sensor files and parses them. 
  *  When the method finishes all data should be in the internal pointer list and all log messages should be printed to stderr.
  *  \param fp_sensor_map file pointer to the map file
@@ -75,5 +80,11 @@ time_t datamgr_get_last_modified(std_int_t sensor_id);
  *  \return the total amount of sensors
  */
 int datamgr_get_total_sensors();
+
+data_element_t* get_data_element(std_int_t sensor_id);
+
+void startManager();
+void datamgr_parse_room (FILE *fp_sensor_map);
+void process_sensor_data(FILE * fp_sensor_data);
 
 #endif  //DATAMGR_H_
