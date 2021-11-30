@@ -27,13 +27,14 @@
 // __FILE__, __func__, __LINE__ -> are variables that are created by the compiler.  __VA_ARGS__ is any other argument(in this case seems to be an string).
 #define ERROR_HANDLER(condition, ...)    do {                       \
                       if (condition) {                              \
-                        printf("\n\nError: in %s - function %s at line %d: %s\n\n", __FILE__, __func__, __LINE__, __VA_ARGS__); \
+                        printf("\nError: in %s - function %s at line %d: %s\n", __FILE__, __func__, __LINE__, __VA_ARGS__); \
                         exit(EXIT_FAILURE);                         \
                       }                                             \
+                      else fprintf(stderr,"\nError: in %s - function %s at line %d: %s\n", __FILE__, __func__, __LINE__, __VA_ARGS__);\
                     } while(0)
 
 /*-- manager error codes --*/
-enum err_code { ERR_NONE = 0, ERR_EMPTY, ERR_FULL, ERR_MEM, ERR_INIT, ERR_UNDEFINED,ERR_INVALID_SEN_ID};
+enum err_code { ERR_NONE = 0, ERR_EMPTY, ERR_FULL, ERR_MEM,ERR_INVALID_SEN_ID};
 
 typedef enum err_code err_code_t;
 

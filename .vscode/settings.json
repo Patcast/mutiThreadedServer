@@ -1,0 +1,7 @@
+{
+    "C_Cpp.errorSquiggles": "Disabled",
+    "files.associations": {
+        "datamgr.h": "c",
+        "errno.h": "c"
+    }
+}

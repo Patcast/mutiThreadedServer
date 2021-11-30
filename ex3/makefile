@@ -3,7 +3,7 @@ HEADERS=dplist.h
 SOURCE=dplist.c
 EXE=build/dplist
 
-FLAGS = -std=c11 -Werror -DSET_MAX_TEMP=20 -DSET_MIN_TEMP=5 -lm $(shell pkg-config --cflags --libs check)
+FLAGS = -std=c11 -Werror -DSET_MAX_TEMP=25 -DSET_MIN_TEMP=10 -lm $(shell pkg-config --cflags --libs check)
 
 test: datamgr.c main.c
 	@echo -e '\n*******************************'
