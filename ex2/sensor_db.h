@@ -1,6 +1,7 @@
 /**
  * \author Patricio Adolfo Castillo Calderon
  */
+#define _GNU_SOURCE
 
 #ifndef _SENSOR_DB_H_
 #define _SENSOR_DB_H_
@@ -9,6 +10,7 @@
 #include <stdlib.h>
 #include "config.h"
 #include <sqlite3.h>
+#include <string.h>
 
 // stringify preprocessor directives using 2-level preprocessor magic
 // this avoids using directives like -DDB_NAME=\"some_db_name\"
@@ -107,5 +109,7 @@ int find_sensor_by_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f);
  * \return zero for success, and non-zero if an error occurs
  */
 int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f);
+
+int executeSQL(DBCONN** db,char* sql,callback_t f);
 
 #endif /* _SENSOR_DB_H_ */
