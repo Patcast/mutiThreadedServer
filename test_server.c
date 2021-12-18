@@ -8,7 +8,10 @@
 #include "config.h"
 #include "lib/tcpsock.h"
 
-#define PORT 5678
+#ifndef PORT
+#error SET_MAX_TEMP not set
+#endif
+
 #define MAX_CONN 3  // state the max. number of connections the server will handle before exiting
 
 
@@ -24,6 +27,8 @@ int main(void) {
 
     printf("Test server is started\n");
     if (tcp_passive_open(&server, PORT) != TCP_NO_ERROR) exit(EXIT_FAILURE);
+
+
     do {
         if (tcp_wait_for_connection(server, &client) != TCP_NO_ERROR) exit(EXIT_FAILURE);
         printf("Incoming client connection\n");
@@ -43,12 +48,16 @@ int main(void) {
                        (long int) data.ts);
             }
         } while (result == TCP_NO_ERROR);
-        if (result == TCP_CONNECTION_CLOSED)
-            printf("Peer has closed connection\n");
-        else
-            printf("Error occured on connection to peer\n");
+
+        if (result == TCP_CONNECTION_CLOSED) printf("Peer has closed connection\n");
+        else printf("Error occured on connection to peer\n");
         tcp_close(&client);
+
     } while (conn_counter < MAX_CONN);
+
+
+
+    
     if (tcp_close(&server) != TCP_NO_ERROR) exit(EXIT_FAILURE);
     printf("Test server is shutting down\n");
     return 0;

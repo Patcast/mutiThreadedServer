@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
     if (tcp_close(&client) != TCP_NO_ERROR) exit(EXIT_FAILURE);
 
     LOG_CLOSE();
+    printf("progrma is closing");
 
     exit(EXIT_SUCCESS);
 }
