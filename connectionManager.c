@@ -6,6 +6,8 @@
 #include <inttypes.h>
 #include <poll.h>
 #include <sys/types.h>
+#include <string.h>
+#include <errno.h>
 #include "errmacros.h"
 #include "config.h"
 #include "lib/tcpsock.h"
@@ -14,203 +16,185 @@
 #define MAX	80
 
 #define MAX_CONN 30
+#define INDEX_OF_SERVER 0
 
 #define TRUE             1
 #define FALSE            0
 
-#define PORT            5000           
-// #ifndef PORT    
-// #error PORT not set
-// #endif
+       
+#ifndef PORT    
+#error PORT not set
+#endif
 
-//    struct pollfd {
-//                int   fd;         /* file descriptor */ if negative, result is ignored 
-//                short events;     /* requested events */
-//                short revents;    /* returned events */
-//            };
-int getSocket(tcpsock_t* sockets,tcpsock_t** clientSocket, int fd);
+#ifndef TIMEOUT    
+#error TIMEOUT not set
+#endif
+
+dplist_t* list;
+
+void* element_copy(void * element);
+void element_free(void** element);
+int element_compare(void * x, void * y);
+
+typedef struct pollfd pollfd_t;
 
 int main(void) {
-    int nConnections = 3;
-    //int sockets_fds [nConnections][2];
     struct pollfd fds[MAX_CONN];
-    char recv_buf[MAX];
-    int i,bytes, alive,server_fd,client_fd, current_size,result,timeout,rc, nfds=1;
-    tcpsock_t* sockets[MAX_CONN];
-    tcpsock_t * currentClient;
+    int  server_fd,client_fd, current_size,result,timeout, nfds=1;
+    tcpsock_t * currentSocket;
     sensor_data_t data;
+    char end_server = FALSE,compress_array,close_conn;
 
-    char end_server,compress_array,close_conn;
-
+    list = dpl_create(element_copy,element_free,element_compare);
 
     // Start server socket 
     printf("Test server is started\n");
-    if (tcp_passive_open(&(sockets[0]), PORT) != TCP_NO_ERROR) exit(EXIT_FAILURE);
+    if (tcp_passive_open(&(currentSocket), PORT) != TCP_NO_ERROR) exit(EXIT_FAILURE);
+    dpl_insert_at_index(list,currentSocket,INDEX_OF_SERVER,false);
 
-    /*************************************************************/
-    /* Initialize the pollfd structure                           */
-    /*************************************************************/
+  
+    //Initialize the pollfd structure          
     memset(fds, 0 , sizeof(fds));
-    /*************************************************************/
-    /* Set up the initial listening socket                        */
-    /*************************************************************/
-    tcp_get_sd((sockets[0]),&server_fd); 
+    timeout = (TIMEOUT * 1000);
+
+    //Set up the initial listening socket                        
+    server_fd = currentSocket->sd;
     fds[0].fd = server_fd;
     fds[0].events = POLLIN;
-
-    /*************************************************************/
-    /* Initialize the timeout to 3 minutes. If no                */
-    /* activity after 3 minutes this program will end.           */
-    /* timeout value is based on milliseconds.                   */
-    /*************************************************************/
-    timeout = (3 * 60 * 1000);
-
-    /*************************************************************/
-    /* Loop waiting for incoming connects or for incoming data   */
-    /* on any of the connected sockets.                          */
-    /*************************************************************/
+  
+    //Loop waiting for incoming connects or for incoming data on any of the connected sockets.                          
     do
     {
+
         printf("Waiting on poll()...\n");
-        rc = poll(fds, nfds, timeout);
-
-        /***********************************************************/
+        result = poll(fds, nfds, timeout);
         /* Check to see if the poll call failed.                   */
-        /***********************************************************/
-        if (rc < 0)
+        if (result < 0)
         {
-        perror("  poll() failed");
-        break;
+            printf("There was an error doing the polling\n\n");
+            perror("poll() failed");
+            break;
         }
-
-        /***********************************************************/
         /* Check to see if the 3 minute time out expired.          */
-        /***********************************************************/
-        if (rc == 0)
+        if (result == 0)
         {
-        printf("  poll() timed out.  End program.\n");
-        break;
+            printf("  poll() timed out.End program.\n");
+            end_server = TRUE; // The program will close. 
+            break;
         }
 
-        /***********************************************************/
         /* One or more descriptors are readable.  Need to          */
         /* determine which ones they are.                          */
-        /***********************************************************/
-        current_size = nfds;
-        for (i = 0; i < current_size; i++)
+        current_size = nfds; // nfds changes through out the loop, so it is important to store the initial value seperately. 
+        for (int i = 0; i < current_size; i++)
         {
-            if(fds[i].revents == 0)
-            continue;
+            // check if there is a revent and no errors. 
+            if(fds[i].revents == 0) continue; // There are no revents for this fd. 
 
-            /*********************************************************/
-            /* If revents is not POLLIN, it's an unexpected result,  */
-            /* log and end the server.                               */
-            /*********************************************************/
             if(fds[i].revents != POLLIN)
             {
-                printf("  Error! revents = %d\n", fds[i].revents);
+                printf("Error! The revents is un expected. fd = %d\n", fds[i].revents);
                 end_server = TRUE;
                 break;
 
             }
-            tcp_get_sd((sockets[0]),&server_fd); 
-            if (fds[i].fd == server_fd)
-            {
-                /*******************************************************/
-                /* Listening descriptor is readable.                   */
-                /*******************************************************/
-                printf("  Listening socket is readable\n");
 
-                /*******************************************************/
-                /* Accept all incoming connections that are            */
-                /* queued up on the listening socket before we         */
-                /* loop back and call poll again.                      */
-                /*******************************************************/
-                do
-                {
+            
+            if (fds[i].fd == server_fd) // server_fd never changes 
+            {               
+                    printf("Listening socket is readable\n");
+                    /// waits for new connection and saves it in currentSocket
+                    result = tcp_wait_for_connection((tcpsock_t* )dpl_get_element_at_index(list,INDEX_OF_SERVER), &currentSocket);
                     // make a new connection
-                    if (tcp_wait_for_connection((sockets[0]), &(sockets[nfds])) != TCP_NO_ERROR){
-                        //exit(EXIT_FAILURE); instead close it better
+                    if (result != TCP_NO_ERROR){
                         perror("Adding socket failed");
                         end_server = TRUE; 
+                        break;
                     } 
-
-                    tcp_get_sd(sockets[nfds],&client_fd);
-                    fds[nfds].fd = client_fd;
+                    dpl_insert_at_index(list,currentSocket,nfds,false);
+                    fds[nfds].fd = currentSocket->sd;
                     fds[nfds].events = POLLIN;
                     printf("Incoming client connection\n");
                     nfds++;
-                }while ( client_fd != -1);
             }
+
             else
             {
                     printf("  Descriptor %d is readable\n", fds[i].fd);
                     close_conn = FALSE;
-                    /*******************************************************/
                     /* Receive all incoming data on this socket            */
-                    /* before we loop back and call poll again.            */
-                    /*******************************************************/
-
-                    do
-                    {   
-
-                        if(getSocket(sockets,&currentClient,fds[i].fd)!=0){
-                            printf("the socket was not found");
-                            break;
-                        }
-                        // read sensor ID
-                        bytes = sizeof(data.id);
-                        result = tcp_receive(currentClient, (void *) &data.id, &bytes);
-                        // read temperature
-                        bytes = sizeof(data.value);
-                        result = tcp_receive(currentClient, (void *) &data.value, &bytes);
-                        // read timestamp
-                        bytes = sizeof(data.ts);
-                        result = tcp_receive(currentClient, (void *) &data.ts, &bytes);
-
-                        if ((result == TCP_NO_ERROR) && bytes) {
-                            printf("sensor id = %" PRIu16 " - temperature = %g - timestamp = %ld\n", data.id, data.value,
-                            (long int) data.ts);
-                            break;// only breaks if there is a problem.
-                        }
-                        else{
-                            if (result == TCP_CONNECTION_CLOSED) printf("Peer has closed connection\n");
-                            else perror("  recv() failed");
-                            close_conn = TRUE;
-                            break;
-
-                        }
-                        //may need to set close_conn = TRUE;
-                    } while (TRUE); 
+                    /* before we loop back and call poll again.            */ 
+                        do {
+                                
+                                currentSocket = dpl_get_element_at_index(list,i); // add check to see if data is found 
+                                // read sensor ID
+                                int bytes = sizeof(data.id);
+                                result = tcp_receive(currentSocket, (void *) &data.id, &bytes);
+                                // read temperature
+                                bytes = sizeof(data.value);
+                                result = tcp_receive(currentSocket, (void *) &data.value, &bytes);
+                                // read timestamp
+                                bytes = sizeof(data.ts);
+                                result = tcp_receive(currentSocket, (void *) &data.ts, &bytes);
+                                if ((result == TCP_NO_ERROR) && bytes) {
+                                    printf("sensor id = %" PRIu16 " - temperature = %g - timestamp = %ld\n", data.id, data.value,(long int) data.ts);
+                                    
+                                    break;    
+                                }
+                                else if (result == TCP_CONNECTION_CLOSED){
+                                    printf("\nPeer has closed connection\n");
+                                    close_conn = TRUE;
+                                    break;
+                                } 
+                                else {
+                                    printf("\nError when reading from sensor.\n");
+                                    perror("recv() failed");
+                                    close_conn = TRUE;
+                                    break;
+                                }
+                            } while (TRUE);
 
                     if (close_conn)
                     {
-                        /// Do an array of clients and a method to find a client base on there fd
-                        tcp_close(&currentClient);    
-                        //close(fds[i].fd); this is done by previous method. 
+                        dpl_remove_element(list,currentSocket,true);// frees node and socket)
                         fds[i].fd = -1;
                         compress_array = TRUE;
                     }
-            }  
-        }/// end of big for loop of pollable descriptors 
-    } while (end_server == FALSE); /* End of serving running.    */
-    
-    for (i = 0; i < nfds; i++)
-    {
-        if(fds[i].fd >= 0){
-            getSocket(sockets,currentClient,fds[i].fd);
-            tcp_close(&currentClient); 
+            }
+        }/// end of big loop of pollable descriptors 
+
+        if (compress_array){
+            compress_array = FALSE;
+            for (int i = 0; i < nfds; i++)
+            {
+                if (fds[i].fd == -1)
+                {
+                    for(int j = i; j < nfds-1; j++)
+                    {
+                        fds[j].fd = fds[j+1].fd;
+                    }
+                    i--;
+                    nfds--;
+                }
+            }
         }
-
-        
-    }
-
+    } while (end_server == FALSE); // End of serving running.
+    printf("\nThe server waitng time has expired\n");
+    dpl_free(&list,true);
+    
     return 0;
 }
 
-int getSocket(tcpsock_t* sockets,tcpsock_t** clientSocket, int fd){
-
-
-
+void * element_copy(void * element) {
+    return NULL;
 }
 
+void element_free(void** ptrElemenet) {
+    tcpsock_t* element = (tcpsock_t*)*ptrElemenet;
+    if (tcp_close(&element) != TCP_NO_ERROR) exit(EXIT_FAILURE);
+    *ptrElemenet = NULL;
+}
+
+int element_compare(void * x, void * y) {
+    return ((((tcpsock_t*)x)->sd < ((tcpsock_t*)y)->sd) ? -1 : (((tcpsock_t*)x)->sd == ((tcpsock_t*)y)->sd) ? 0 : 1);
+}

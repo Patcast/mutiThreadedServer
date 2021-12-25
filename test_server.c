@@ -9,7 +9,7 @@
 #include "lib/tcpsock.h"
 
 #ifndef PORT
-#error SET_MAX_TEMP not set
+#error Port not set
 #endif
 
 #define MAX_CONN 3  // state the max. number of connections the server will handle before exiting

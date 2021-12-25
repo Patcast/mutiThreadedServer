@@ -230,82 +230,82 @@ void deleteNode (dplist_t* list,dplist_node_t* dummy,bool deleteElement){
 
 //***** EXTRA MEHTHODS ********************************///
 
-// dplist_node_t* dpl_get_first_reference(dplist_t *list){
-//     return dpl_get_reference_at_index(list,0);      
-// }
-// dplist_node_t* dpl_get_last_reference(dplist_t *list){
-//     int size = dpl_size(list);
-//     if (size>0){
-//         dplist_node_t* ref = dpl_get_reference_at_index(list,size-1); 
-//         return ref;
-//     }
-//     else return NULL;
-// }
+dplist_node_t* dpl_get_first_reference(dplist_t *list){
+    return dpl_get_reference_at_index(list,0);      
+}
+dplist_node_t* dpl_get_last_reference(dplist_t *list){
+    int size = dpl_size(list);
+    if (size>0){
+        dplist_node_t* ref = dpl_get_reference_at_index(list,size-1); 
+        return ref;
+    }
+    else return NULL;
+}
 
-// dplist_node_t* dpl_get_next_reference(dplist_t *list, dplist_node_t* reference){
-//     int index = dpl_get_index_of_reference(list,reference);
-//     if(index>=0)return reference->next;
-//     else return NULL;
-// }
-// dplist_node_t *dpl_get_previous_reference(dplist_t *list, dplist_node_t *reference){
-//     int index = dpl_get_index_of_reference(list,reference);
-//     if(index>=0)return reference->prev;
-//     else return NULL;
-// }
-// dplist_node_t *dpl_get_reference_of_element(dplist_t *list, void *element){
-//     dplist_node_t* node =NULL;
-//     if (element!=NULL){    
-//         dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 	
-//         if (dummy !=NULL){
-//                 for (int count = 0; count < (list ->size); dummy = dummy->next, count++) {
-//                     if ((list->element_compare)(element,(dummy->element))==0){
-//                         node = dummy;
-//                         break;
-//                     }
-//                 }
-//         }
-//     }
-//     return node;
-// }
+dplist_node_t* dpl_get_next_reference(dplist_t *list, dplist_node_t* reference){
+    int index = dpl_get_index_of_reference(list,reference);
+    if(index>=0)return reference->next;
+    else return NULL;
+}
+dplist_node_t *dpl_get_previous_reference(dplist_t *list, dplist_node_t *reference){
+    int index = dpl_get_index_of_reference(list,reference);
+    if(index>=0)return reference->prev;
+    else return NULL;
+}
+dplist_node_t *dpl_get_reference_of_element(dplist_t *list, void *element){
+    dplist_node_t* node =NULL;
+    if (element!=NULL){    
+        dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 	
+        if (dummy !=NULL){
+                for (int count = 0; count < (list ->size); dummy = dummy->next, count++) {
+                    if ((list->element_compare)(element,(dummy->element))==0){
+                        node = dummy;
+                        break;
+                    }
+                }
+        }
+    }
+    return node;
+}
 
-// int dpl_get_index_of_reference(dplist_t *list, dplist_node_t *reference){
-//     int index = -1;
-// 	dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 
+int dpl_get_index_of_reference(dplist_t *list, dplist_node_t *reference){
+    int index = -1;
+	dplist_node_t* dummy = dpl_get_reference_at_index(list,0); 
 		
-// 	if (dummy != NULL && reference != NULL){ 
-//             for (int count = 0; count < (list ->size); dummy = dummy->next, count++) {
-//         		if (dummy == reference){
-//         			index = count;
-//         			return index;
-//         		}
-//     		}
-// 	}	
-//     return index;
-// }
-// // To be implemented later if needed...
-// //dplist_t *dpl_insert_sorted(dplist_t *list, void *element, bool insert_copy);
-// //dplist_t *dpl_insert_at_reference(dplist_t *list, void *element, dplist_node_t *reference, bool insert_copy);
+	if (dummy != NULL && reference != NULL){ 
+            for (int count = 0; count < (list ->size); dummy = dummy->next, count++) {
+        		if (dummy == reference){
+        			index = count;
+        			return index;
+        		}
+    		}
+	}	
+    return index;
+}
+// To be implemented later if needed...
+//dplist_t *dpl_insert_sorted(dplist_t *list, void *element, bool insert_copy);
+//dplist_t *dpl_insert_at_reference(dplist_t *list, void *element, dplist_node_t *reference, bool insert_copy);
 
-// dplist_t *dpl_remove_at_reference(dplist_t *list, dplist_node_t *reference, bool free_element){
-//     dplist_t* returnList = NULL;
-//     if (list!=NULL && reference!=NULL){
-//         returnList = list;
-//         int index = dpl_get_index_of_reference(list,reference);
-//         if (index>=0){
-//             dpl_remove_at_index(list,index,free_element);
-//         }
-//     }
-//     return returnList;
-// }
-// dplist_t *dpl_remove_element(dplist_t *list, void *element, bool free_element){
-//     dplist_t* returnList = NULL;
-//     if (list!=NULL && element!=NULL){
-//         returnList = list;
-//         int index = dpl_get_index_of_element(list,element);
-//         if (index>=0){
-//             dpl_remove_at_index(list,index,free_element);
-//         }
-//     }
-//     return returnList;
-// }
+dplist_t *dpl_remove_at_reference(dplist_t *list, dplist_node_t *reference, bool free_element){
+    dplist_t* returnList = NULL;
+    if (list!=NULL && reference!=NULL){
+        returnList = list;
+        int index = dpl_get_index_of_reference(list,reference);
+        if (index>=0){
+            dpl_remove_at_index(list,index,free_element);
+        }
+    }
+    return returnList;
+}
+dplist_t *dpl_remove_element(dplist_t *list, void *element, bool free_element){
+    dplist_t* returnList = NULL;
+    if (list!=NULL && element!=NULL){
+        returnList = list;
+        int index = dpl_get_index_of_element(list,element);
+        if (index>=0){
+            dpl_remove_at_index(list,index,free_element);
+        }
+    }
+    return returnList;
+}
 
