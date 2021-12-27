@@ -12,6 +12,8 @@
 typedef struct sbuffer_node {
     struct sbuffer_node *next;  /**< a pointer to the next node*/
     sensor_data_t data;         /**< a structure containing the data */
+    char readByStorageMgr;      //Flags use to determine if both threads have read the data. 
+    char readByDataMgr;
 } sbuffer_node_t;
 
 /**
@@ -45,12 +47,19 @@ int sbuffer_free(sbuffer_t **buffer) {
     return SBUFFER_SUCCESS;
 }
 
-int sbuffer_remove(sbuffer_t *buffer, sensor_data_t *data) {
+
+
+int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char dataMang, char storageMang) {
     sbuffer_node_t *dummy;
     if (buffer == NULL) return SBUFFER_FAILURE;
     if (buffer->head == NULL) return SBUFFER_NO_DATA;
+    /// this is a read lock where we read data. 
+    /// go one by one until one has the corrsponding flag not set. if it finds double flag set it will delete the element
     *data = buffer->head->data;
     dummy = buffer->head;
+
+    // if data needs to be deleted then assign read lock.  only if both flags are set. 
+    ///steps to delete data.
     if (buffer->head == buffer->tail) // buffer has only one node
     {
         buffer->head = buffer->tail = NULL;
@@ -59,6 +68,8 @@ int sbuffer_remove(sbuffer_t *buffer, sensor_data_t *data) {
         buffer->head = buffer->head->next;
     }
     free(dummy);
+
+    ///// end of deletion 
     return SBUFFER_SUCCESS;
 }
 
