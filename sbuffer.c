@@ -6,24 +6,6 @@
 #include <stdio.h>
 #include "sbuffer.h"
 
-/**
- * basic node for the buffer, these nodes are linked together to create the buffer
- */
-typedef struct sbuffer_node {
-    struct sbuffer_node *next;  /**< a pointer to the next node*/
-    sensor_data_t data;         /**< a structure containing the data */
-    char readByStorageMgr;      //Flags use to determine if both threads have read the data. 
-    char readByDataMgr;
-} sbuffer_node_t;
-
-/**
- * a structure to keep track of the buffer
- */
-struct sbuffer {
-    sbuffer_node_t *head;       /**< a pointer to the first node in the buffer */
-    sbuffer_node_t *tail;       /**< a pointer to the last node in the buffer */
-};
-
 int sbuffer_init(sbuffer_t **buffer) {
     *buffer = malloc(sizeof(sbuffer_t));
     if (*buffer == NULL) return SBUFFER_FAILURE;
@@ -67,6 +49,7 @@ int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char dataMang, char st
     {
         buffer->head = buffer->head->next;
     }
+
     free(dummy);
 
     ///// end of deletion 
