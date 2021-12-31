@@ -24,21 +24,7 @@
 #endif
 
 #define DBCONN sqlite3
-
-#define SYSCALL_ERROR(err) \
-        do{ \
-            if((err)==-1){\
-                perror("error executiong syscall");\
-                exit(EXIT_FAILURE);\
-                 } \
-        }while(0)    
-#define FILE_ERROR(fp, error_msg)    do {               \
-                      if ((fp)==NULL) {                 \
-                        printf("%s\n",(error_msg));     \
-                        exit(EXIT_FAILURE);             \
-                      }                                 \
-                    } while(0)
-
+#include "../headers/config.h"
 
 
 typedef int (*callback_t)(void *, int, char **, char **);

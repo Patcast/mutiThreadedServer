@@ -2,6 +2,7 @@
 
 
 FLAGS = -lsqlite3 -std=c99 -Werror  -lm $(shell pkg-config --cflags --libs check)
+CODE = lib/sensor_db.c main.c source/log_generation.c source/storageManager.c 
 
 
 # database:  sensor_db.c main.c
@@ -9,12 +10,12 @@ FLAGS = -lsqlite3 -std=c99 -Werror  -lm $(shell pkg-config --cflags --libs check
 # 	@./database
 # the files for ex2 will be ziped and are then ready to
 # be submitted to labtools.groept.be
-test: sensor_db.c main.c
+test: 
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
 	@mkdir -p build
-	@gcc sensor_db.c main.c -o  build/database -Wall -std=c11 -Werror -lm -lsqlite3 -pthread -I/usr/local/include -L/usr/local/lib -lcheck	
+	@gcc $(CODE) -o  build/database -Wall -std=c11 -Werror -lm -lsqlite3 -pthread -I/usr/local/include -L/usr/local/lib -lcheck	
 	@echo -e '\n*************************'
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
@@ -60,4 +61,4 @@ final: sensor_db.c main.c
 	@./build/database
 
 zip:
-	@zip lab6_ex2.zip sensor_db.c config.h
+	@zip filesAndData/lab6_ex2.zip sensor_db.c config.h

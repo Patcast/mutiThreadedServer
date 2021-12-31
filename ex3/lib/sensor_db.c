@@ -1,5 +1,4 @@
 #define _GNU_SOURCE
-#include "config.h"
 #include "sensor_db.h"
 
 int executeSQL(DBCONN** db,char* sql,callback_t f);
