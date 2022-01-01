@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "sensor_db.h": "c"
+        "sensor_db.h": "c",
+        "log_generation.h": "c"
     }
 }

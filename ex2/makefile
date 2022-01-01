@@ -25,10 +25,19 @@ valgrind: sensor_db.c main.c
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
 	@mkdir -p build
-	@gcc  sensor_db.c main.c -g -o build/database $(FLAGS)	
+	@gcc sensor_db.c main.c -g -o  build/database -Wall -std=c11 -Werror -lm -lsqlite3 -pthread -I/usr/local/include -L/usr/local/lib -lcheck	
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
-	@export CK_FORK=no ; valgrind -s ./build/database
+	@export CK_FORK=no ;  valgrind -s ./build/database
+fullValgrind: sensor_db.c main.c
+	@echo -e '\n*******************************'
+	@echo -e '*** Compiling for UNIT TEST ***'
+	@echo -e '*******************************'
+	@mkdir -p build
+	@gcc sensor_db.c main.c -g -o  build/database -Wall -std=c11 -Werror -lm -lsqlite3 -pthread -I/usr/local/include -L/usr/local/lib -lcheck	
+	@echo -e '*** Running UNIT TEST ***'
+	@echo -e '*************************'
+	@export CK_FORK=no ; valgrind -s --leak-check=full ./build/database
 gdb: sensor_db.c main.c
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
@@ -39,6 +48,16 @@ gdb: sensor_db.c main.c
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
 	export CK_FORK=no ; gdb -q -tui ./build/database
+final: sensor_db.c main.c
+	@echo -e '\n*******************************'
+	@echo -e '*** Compiling for UNIT TEST ***'
+	@echo -e '*******************************'
+	@mkdir -p build
+	@gcc sensor_db.c main.c -o  build/database -Wall -std=c11 -Werror -lm -lsqlite3 -pthread -I/usr/local/include -L/usr/local/lib -lcheck	
+	@echo -e '\n*************************'
+	@echo -e '*** Running UNIT TEST ***'
+	@echo -e '*************************'
+	@./build/database
 
 zip:
 	@zip lab6_ex2.zip sensor_db.c config.h

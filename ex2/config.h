@@ -2,11 +2,16 @@
  * \author Patricio Adolfo Castillo Calderon
  */
 
+
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
-
+#define _GNU_SOURCE
 #include <stdint.h>
 #include <time.h>
+#include <sqlite3.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 typedef uint16_t sensor_id_t;
 typedef double sensor_value_t;

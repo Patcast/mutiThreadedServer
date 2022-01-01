@@ -1,4 +1,9 @@
+#define _GNU_SOURCE
+#include "config.h"
 #include "sensor_db.h"
+
+int executeSQL(DBCONN** db,char* sql,callback_t f);
+
 
 DBCONN* init_connection(char clear_up_flag){
     DBCONN* db;
@@ -41,6 +46,7 @@ int executeSQL(DBCONN** db,char* sql,callback_t f){
         fprintf(stderr, "SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);      
     } 
+    free(sql);
     return rc;
 }
 int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_t ts){
@@ -51,13 +57,15 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 
 int insert_sensor_from_file(DBCONN *conn, FILE *sensor_data){
     sensor_data_t dataIn;
+    int rc=0;
     while(feof(sensor_data)== 0){
         fread(&(dataIn.id),sizeof(sensor_id_t),1,sensor_data);
         fread(&(dataIn.value),sizeof(sensor_value_t),1,sensor_data);
         fread(&(dataIn.ts),sizeof(sensor_ts_t),1,sensor_data);
-        int rc = insert_sensor(conn,dataIn.id,dataIn.value,dataIn.ts);
+        rc = insert_sensor(conn,dataIn.id,dataIn.value,dataIn.ts);
         if (rc!=0)return rc;
     }
+    return rc;
 }
 
 int find_sensor_all(DBCONN *conn, callback_t f){
