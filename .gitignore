@@ -1,6 +1,8 @@
 #ingnore the default executable, e.g. a.out or files in the build folder
 a.out
 build/
+info/
+filesAndData/
 
 #ignore all zip files
 *.zip
@@ -9,5 +11,8 @@ build/
 *.o
 *.so
 *.a
+*.pdf
+*.db
+.vscode
 
 #add any other files or filetypes you do not want to appear in your repo in this file
