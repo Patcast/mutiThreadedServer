@@ -87,5 +87,7 @@ data_element_t* get_data_element(std_int_t sensor_id);
 void startManager();
 void datamgr_parse_room (FILE *fp_sensor_map);
 void process_sensor_data(FILE * fp_sensor_data);
+void insertAndShift(sensor_data_t valueToInstert, data_element_t* data_element);
+sensor_value_t calculateAvg(sensor_value_t* array);
 
 #endif  //DATAMGR_H_

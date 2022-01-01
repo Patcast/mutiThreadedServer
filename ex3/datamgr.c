@@ -6,7 +6,7 @@
 #define _GNU_SOURCE
 #include "config.h"  //tools to handle tada from sensors
 #include "datamgr.h" 
-#include "dplist.h" 
+#include "lib/dplist.h" 
 #include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,18 +20,12 @@ char error_message [250];
 void error_massage_generator(err_code_t error);
 void* element_copy(void * element);
 void element_free(void** element);
-/** Uses the property id to compare to my_element_t object.
- * \param x a pointer to the list
- * \param y a pointer to the list
- * \return An integer, if x(id) SMALLER than y(id) returns -1, 0 if equal and 1 if x(id) is BIGGER than y(id).
- */
 int element_compare(void * x, void * y);
 void* createNewData(std_int_t idS,std_int_t idT);
 
 sensor_value_t* createArray();
 void printArray();
-sensor_value_t* insertAndShift(sensor_data_t valueToInstert, data_element_t* data_element);
-sensor_value_t calculateAvg(sensor_value_t* array);
+
 
 //********************************************* Methods for list
 
@@ -85,14 +79,14 @@ void printArray(sensor_value_t* array){
     }
     printf("\n************\n");
 }
-sensor_value_t* insertAndShift(sensor_data_t valueToInstert, data_element_t* data_element){
+void insertAndShift(sensor_data_t valueToInstert, data_element_t* data_element){
     if(data_element->numRecAdded >=RUN_AVG_LENGTH){
         for(int i=0;i<RUN_AVG_LENGTH-1;i++){
             data_element->ptrToRecords[i] = data_element->ptrToRecords[i+1];
         }
         data_element->ptrToRecords[RUN_AVG_LENGTH-1]= valueToInstert.value;
         data_element->avg = calculateAvg(data_element->ptrToRecords);
-        if((data_element->avg)>SET_MAX_TEMP)fprintf(stderr, "\nThe room (RoomId =%d) at time %ld is too hot. Temp avarage => %f"
+        if((data_element->avg)>SET_MAX_TEMP)fprintf(stderr, "The room (RoomId =%d) at time %ld is too hot. Temp avarage => %f\n"
         ,data_element->idTemp
         ,data_element->ts
         ,data_element->avg);
@@ -141,7 +135,7 @@ void datamgr_parse_room (FILE *fp_sensor_map){
     int count =0;
     while
     (fscanf(fp_sensor_map,"%hd %hd\n",&roomIdIn,&sensorIdIn)!= EOF)
-    {   
+    {     
         dpl_insert_at_index(list, createNewData(sensorIdIn,roomIdIn), count,false);
      #ifdef DEBUG   
         printf("\nSensor id: %hd\tRoom id: %hd",sensorIdIn,roomIdIn);

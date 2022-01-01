@@ -10,7 +10,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-char numRecAdded = 0;
+//char numRecAdded = 0;
 // end of error includes 
 // sensor_value_t* createArray();
 // void printArray();
@@ -24,7 +24,9 @@ int main(void) {
     if (fileRoom == NULL || fileSensor == NULL ){
          perror("My error is");
     }
+
     datamgr_parse_sensor_files(fileRoom,fileSensor);
+    
     fclose(fileRoom);
     fclose(fileSensor);
     datamgr_free(); 
