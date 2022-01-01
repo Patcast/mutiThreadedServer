@@ -31,29 +31,32 @@ int sbuffer_free(sbuffer_t **buffer) {
 
 
 
-int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char dataMang, char storageMang) {
+int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char manager_flag) {
     sbuffer_node_t *dummy;
     if (buffer == NULL) return SBUFFER_FAILURE;
     if (buffer->head == NULL) return SBUFFER_NO_DATA;
-    /// this is a read lock where we read data. 
-    /// go one by one until one has the corrsponding flag not set. if it finds double flag set it will delete the element
-    *data = buffer->head->data;
-    dummy = buffer->head;
+    // find dummy with no flag set;
+    int findingResut = findBufferNode(&dummy, buffer, manager_flag);
 
-    // if data needs to be deleted then assign read lock.  only if both flags are set. 
-    ///steps to delete data.
-    if (buffer->head == buffer->tail) // buffer has only one node
-    {
-        buffer->head = buffer->tail = NULL;
-    } else  // buffer has many nodes empty
-    {
-        buffer->head = buffer->head->next;
+    if(findingResut ==SBUFFER_NO_DATA)return SBUFFER_NO_DATA; 
+    else{
+        *data = dummy->data; 
+        //printf("----------------dummy read\n");
+        if (findingResut ==SBUFFER_SUCCESS_AND_DELETE){
+            ///steps to delete data.
+            
+            if (buffer->head == buffer->tail) // buffer has only one node
+            {
+                buffer->head = buffer->tail = NULL;
+            } else  // buffer has many nodes empty
+            {
+                buffer->head = buffer->head->next;
+            }
+            //printf("--------------dummey deleted\n");
+            free(dummy);
+        } 
+        return SBUFFER_SUCCESS;
     }
-
-    free(dummy);
-
-    ///// end of deletion 
-    return SBUFFER_SUCCESS;
 }
 
 int sbuffer_insert(sbuffer_t *buffer, sensor_data_t *data) {
@@ -63,6 +66,8 @@ int sbuffer_insert(sbuffer_t *buffer, sensor_data_t *data) {
     if (dummy == NULL) return SBUFFER_FAILURE;
     dummy->data = *data;
     dummy->next = NULL;
+    dummy ->readByDataMgr = FALSE;
+    dummy ->readByStorageMgr = FALSE;
     if (buffer->tail == NULL) // buffer empty (buffer->head should also be NULL
     {
         buffer->head = buffer->tail = dummy;
@@ -73,3 +78,38 @@ int sbuffer_insert(sbuffer_t *buffer, sensor_data_t *data) {
     }
     return SBUFFER_SUCCESS;
 }
+
+int isBufferEmpty(sbuffer_t *buffer){
+    int value;
+    if(buffer->head ==NULL)value = SBUFFER_NO_DATA;
+    else value = SBUFFER_SUCCESS;
+    return value;
+}
+
+int findBufferNode(sbuffer_node_t ** ptrDummy, sbuffer_t* buffer,char manager_flag){
+    sbuffer_node_t *dummy  = buffer ->head;
+
+    while(dummy!=NULL){
+
+        if(manager_flag==DATA_MGR_FLAG && dummy->readByDataMgr ==FALSE){
+            dummy->readByDataMgr = TRUE;
+            break;
+        }
+        else if(manager_flag==STORAGE_MGR_FLAG && dummy->readByStorageMgr ==FALSE){
+            dummy->readByStorageMgr = TRUE;
+            break;
+        }
+        dummy = dummy ->next;   
+    } /// end dummy == NULL if not found 
+
+    if(dummy!= NULL){
+        *ptrDummy = dummy;
+        
+        if(dummy->readByStorageMgr==dummy->readByDataMgr)return SBUFFER_SUCCESS_AND_DELETE;
+        else return SBUFFER_SUCCESS_AND_NO_DELETE;
+    }
+    else return SBUFFER_NO_DATA;
+
+}
+
+

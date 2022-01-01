@@ -10,6 +10,13 @@
 #define SBUFFER_FAILURE -1
 #define SBUFFER_SUCCESS 0
 #define SBUFFER_NO_DATA 1
+#define SBUFFER_SUCCESS_AND_DELETE 2
+#define SBUFFER_SUCCESS_AND_NO_DELETE 3
+
+#define STORAGE_MGR_FLAG 1
+#define DATA_MGR_FLAG 2
+#define TRUE 1
+#define FALSE 0
 
 /**
  * basic node for the buffer, these nodes are linked together to create the buffer
@@ -50,7 +57,7 @@ int sbuffer_free(sbuffer_t **buffer);
  * \param data a pointer to pre-allocated sensor_data_t space, the data will be copied into this structure. No new memory is allocated for 'data' in this function.
  * \return SBUFFER_SUCCESS on success and SBUFFER_FAILURE if an error occurred
  */
-int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char dataMang, char storageMang);
+int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char manager_flag);
 
 /**
  * Inserts the sensor data in 'data' at the end of 'buffer' (at the 'tail')
@@ -59,5 +66,9 @@ int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char dataMang, char st
  * \return SBUFFER_SUCCESS on success and SBUFFER_FAILURE if an error occured
 */
 int sbuffer_insert(sbuffer_t *buffer, sensor_data_t *data);
+
+int findBufferNode(sbuffer_node_t ** ptrDummy, sbuffer_t* buffer,char manager_flag);
+
+int isBufferEmpty(sbuffer_t *buffer);
 
 #endif  //_SBUFFER_H_
