@@ -1,9 +1,7 @@
 #define _GNU_SOURCE
 #include "sensor_db.h"
 
-#ifndef MAKE_NEW_TABLE
-#define MAKE_NEW_TABLE FALSE
-#endif
+
 
 
 ///////* Main Method***************///////
@@ -36,19 +34,19 @@ void* storageManager(void * thread_param_input){
             //printf("\nawake Storage\n");
             resultBuffer =sbuffer_remove(param->bufferHead,&dataInPtr,STORAGE_MGR_FLAG);
         }
-
+        #ifdef DEBUG_STORAGE_MGR  
+                printf("S:\t%d\t%f\t%ld\n",dataInPtr.id,dataInPtr.value,dataInPtr.ts);
+        #endif
         resultLock = pthread_mutex_unlock( param->data_mutex  );
         SYNCRONIZATION_ERROR(resultLock);
-        //printf("data found or TCP finish for Storage with result %d\n", resultBuffer);
         if(resultBuffer ==SBUFFER_SUCCESS){
             insert_sensor(db,dataInPtr.id,dataInPtr.value,dataInPtr.ts);
-            printf("Storage:\t%d\t%f\t%ld\n",dataInPtr.id,dataInPtr.value,dataInPtr.ts);
         }
-
         if(*(param->tcpOpenFlag )==FALSE && !(resultBuffer ==SBUFFER_SUCCESS))break;
     }
-    
-    printf("Storage wants to close\n");
+    #ifdef DEBUG_STORAGE_MGR  
+         printf("Storage is closing...\n");
+    #endif
     disconnect(db);
     DISCONNECT_DB((*(param->ptrToFilePtr))); 
     pthread_exit(NULL);

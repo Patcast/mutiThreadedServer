@@ -93,5 +93,16 @@
 				exit( EXIT_FAILURE );						\
 			}												\
 		} while(0)
+#define EMPTY_LIST() 								\
+		do {												\
+ 				fprintf(stderr,"\nIn %s - function %s at line %d:Cannot retive data. Because, the list is empty.\n\n", __FILE__, __func__, __LINE__);\
+				fflush(stderr); 			\
+		} while(0)
 
+#define LIST_IS_NULL() 								\
+		do {												\
+				fprintf(stderr,"\nIn %s - function %s at line %d: Error from attempting to retrive data from NULL list.\n\n", __FILE__, __func__, __LINE__);\
+				fflush(stderr); 			\
+				exit( EXIT_FAILURE );						\
+		} while(0)
 #endif

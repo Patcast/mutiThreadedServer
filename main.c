@@ -1,17 +1,16 @@
 
 #include "sensor_db.h"
+#include "connmgr.h"
+#include "datamgr.h"
 
-#define FILES_TO_READ 5
 //__sig_atomic_t closingFlag;
 
-int treadsHandler(void);
+int treadsHandler(char* port);
 void freeThreadsParam(thread_parameters_t* thread_param);
-thread_parameters_t* startThreadsParam();
+thread_parameters_t* startThreadsParam(int port );
 void startsLogFileGenerator();
 
-
-
-int main (void ){
+int main ( int argc, char *argv[]  ){
 
     pid_t log_pid,pid;
     int logExitStatus;
@@ -22,118 +21,35 @@ int main (void ){
         startsLogFileGenerator();
     }
     else{   // Code that woul be executed by the parent
-        int rs = treadsHandler();
+        int rs = treadsHandler(argv[1]);
         THREAD_ERROR(rs);
         printf("All threads are closed ..............");
     }
 
-    printf("\n\n\nwaiting to log to close...\n");
     pid = wait(&logExitStatus);
     SYSCALL_ERROR(pid);
     if(WIFEXITED(logExitStatus)){ // check if child exited correctly
-        printf("\nMain Process %d terminated with exit code %d\n",pid,logExitStatus);
+        printf("\nLog Process %d terminated with exit code %d\n",pid,logExitStatus);
     }
     else{
-        printf("\nMain process %d terminated abnormally %d",pid, logExitStatus);
+        printf("\nLog process %d terminated abnormally %d",pid, logExitStatus);
 
     }
     return 0;
 }
 
-
-void *f_tcpSocket (void * thread_param_input){
-    sensor_data_t data;
-    int resultLock;
-    int count = FILES_TO_READ;
-    FILE *fileSensor;
-    thread_parameters_t* param = thread_param_input;
-
-    fileSensor = fopen("filesAndData/sensor_data","r");//tSafe
-    FILE_OPEN_ERROR(fileSensor);
-
-    while(feof(fileSensor)== 0 && count--){ //for debug only 
-    // while(feof(fileSensor)== 0 ){//tSafe
-
-
-        fread(&(data.id),sizeof(sensor_id_t),1,fileSensor);//tSafe
-        fread(&(data.value),sizeof(sensor_value_t),1,fileSensor);
-        fread(&(data.ts),sizeof(sensor_ts_t),1,fileSensor);
-
-        resultLock = pthread_mutex_lock( param->data_mutex ); /// critical secction  
-        SYNCRONIZATION_ERROR(resultLock);
-
-        sbuffer_insert(param->bufferHead,&data);
-        printf("data added to buffer\n");
-        resultLock = pthread_cond_broadcast(param->myConVar);        //// communicate that there is data available. 
-        SYNCRONIZATION_ERROR(resultLock);
-
-        resultLock = pthread_mutex_unlock(param->data_mutex );
-        SYNCRONIZATION_ERROR(resultLock);
-        //sleep(1);//
-
-    }
-
-    //printf("All data was added to buffer\n\n\n"); /// if no sensor sedn data within timeout we close. 
-    fclose(fileSensor);
-    printf("TCP wants to close\n");
-    pthread_exit(NULL);
-}
-
-/* void *f_dataManager (void * buffer){
-    FILE *fileData;
-    int resultBuffer, resultLock;
-    sensor_data_t dataInPtr;
-
-    fileData = fopen("filesAndData/sensor_data_text.txt", "w");
-    FILE_OPEN_ERROR(fileData);
-    
-
-    while(1){
-
-        resultLock = pthread_mutex_lock( &data_mutex ); /// critical secction  
-        SYNCRONIZATION_ERROR(resultLock);
-
-        resultBuffer =sbuffer_remove(buffer,&dataInPtr,DATA_MGR_FLAG);
-        while(tcpOpen==TRUE && resultBuffer==SBUFFER_NO_DATA){
-            //printf("\nwait DATA\n");
-            pthread_cond_wait(&myConVar,&data_mutex);
-            //printf("\nawake DATA\n");
-            resultBuffer =sbuffer_remove(buffer,&dataInPtr,DATA_MGR_FLAG);
-        }
-
-        resultLock = pthread_mutex_unlock( &data_mutex );
-        SYNCRONIZATION_ERROR(resultLock);
-        //printf("data found or TCP finish for Data with result %d\n", resultBuffer);
-        if(resultBuffer ==SBUFFER_SUCCESS){
-            fprintf(fileData,"%d\t%f\t%ld\n",dataInPtr.id,dataInPtr.value,dataInPtr.ts);
-            printf("dataMgr---%d\t%f\t%ld\n",dataInPtr.id,dataInPtr.value,dataInPtr.ts);
-            //sleep(3);
-        }
-
-        if(tcpOpen==FALSE && !(resultBuffer ==SBUFFER_SUCCESS))break;
-
-    }
-    
-   
-    fclose(fileData);
-    printf("Data wants to close\n");
-    pthread_exit(NULL);
-} */
-
-
-int treadsHandler(){
-
+int treadsHandler(char* portString){
     thread_parameters_t* thread_param;
     int result;
-    // pthread_t   t_tcp,t_dataManager, t_storageManager;
-    pthread_t   t_tcp, t_storageManager;
-    
-    thread_param = startThreadsParam();
+    pthread_t   t_tcp,t_dataManager, t_storageManager;
+    int port;
+    sscanf(portString, "%d", &port);  
+    thread_param = startThreadsParam(port);
     ////*** CREATE THREADS
-    result= pthread_create(&t_tcp,NULL,f_tcpSocket,(void*)thread_param);
+    result= pthread_create(&t_tcp,NULL,connmgr_listen,(void*)thread_param);
     THREAD_ERROR(result);
-/*     result= pthread_create(&t_dataManager,NULL,f_dataManager,(void*)thread_param);
-    THREAD_ERROR(result); */
+    result= pthread_create(&t_dataManager,NULL,dataManager,(void*)thread_param);
+    THREAD_ERROR(result);
     result= pthread_create(&t_storageManager,NULL,storageManager,(void*)thread_param);
     THREAD_ERROR(result);
 
@@ -152,15 +68,15 @@ int treadsHandler(){
     SYNCRONIZATION_ERROR(result);
 
     ////*** WAIT FOR READING THREADS TO CLOSE 
-/*  result= pthread_join(t_dataManager, NULL);
-    THREAD_ERROR(result);    */ 
+    result= pthread_join(t_dataManager, NULL);
+    THREAD_ERROR(result);
     result= pthread_join(t_storageManager, NULL);
     THREAD_ERROR(result); 
     freeThreadsParam(thread_param);
     return 0;
 }
 
-thread_parameters_t* startThreadsParam( ){
+thread_parameters_t* startThreadsParam(int port ){
 
     thread_parameters_t* thread_param = malloc(sizeof(thread_parameters_t));
     thread_param->ptrToFilePtr = malloc(sizeof(FILE*));
@@ -171,7 +87,6 @@ thread_parameters_t* startThreadsParam( ){
     *(thread_param->ptrToFilePtr) = fopen(FIFO_NAME, "w");
     FILE_OPEN_ERROR(*(thread_param->ptrToFilePtr));
     printf("\nsyncing with reader ok\n");
-    printf("\n\ndouble\n\n");
     
     MEMORY_ERROR(thread_param);
     thread_param->data_mutex = malloc(sizeof(pthread_mutex_t));
@@ -184,6 +99,7 @@ thread_parameters_t* startThreadsParam( ){
     *(thread_param->myConVar) = (pthread_cond_t)PTHREAD_COND_INITIALIZER;
     *(thread_param->tcpOpenFlag) = 1; 
     sbuffer_init(&(thread_param->bufferHead));
+    thread_param->portNumber = port;
     return thread_param;
 }
 
@@ -198,8 +114,10 @@ void freeThreadsParam(thread_parameters_t* thread_param){
     result = fclose(*(thread_param->ptrToFilePtr));
     FILE_CLOSE_ERROR(result);
     free(thread_param->ptrToFilePtr);
+    // if(thread_param->bufferHead->head==NULL)printf("\n\nOn closing buffer is empty\n\n");
+    free((thread_param->bufferHead));
+    //free(thread_param->bufferHead);// assumes that buffer is empty at this point. 
     free(thread_param);
-    sbuffer_free(&(thread_param->bufferHead));
 }
 
 void startsLogFileGenerator(){
@@ -216,7 +134,6 @@ void startsLogFileGenerator(){
     fp = fopen(FIFO_NAME, "r"); 
     printf("syncing with writer ok\n");
     FILE_OPEN_ERROR(fp);
-
     fp_log = fopen("filesAndData/gateway.log", "w");
     FILE_OPEN_ERROR(fp_log);
 
@@ -238,5 +155,3 @@ void startsLogFileGenerator(){
     printf("\nlog process is about to exit...\n");
     exit(EXIT_SUCCESS);
 }
-
-

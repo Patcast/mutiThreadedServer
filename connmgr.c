@@ -3,27 +3,27 @@
 
 
 
-void connmgr_listen(int port_number){
+void* connmgr_listen(void * thread_param_input){
+
     dplist_t* list;
     pollfd_t* fds=NULL;
-
-    int  server_fd, current_size,result,timeout = (TIMEOUT * 1000), nfds=1;
+    int  server_fd, current_size,resultLock,result,timeout = (TIMEOUT * 1000);
     sensor_data_t data;
-    char end_server = FALSE,compress_array = FALSE,close_conn;
-    FILE* sensor_data_recv;
+    char end_server = FALSE;
     socket_sensor_t * newSocket;
     
+    thread_parameters_t* param = thread_param_input;
 
-    sensor_data_recv = fopen("sensor_data_recv", "a");
-    FILE_OPEN_ERROR(sensor_data_recv);
+
     list = dpl_create(element_copy,element_free,element_compare);
 
     // Start server socket & Set up the initial listening socket 
-    printf("Test server is started\n");
+    // printf("Test server is started\n");
     newSocket = malloc(sizeof(socket_sensor_t));// make space on heap for new socket 
-    if (tcp_passive_open(&(newSocket->tcpPointer), port_number) != TCP_NO_ERROR) exit(EXIT_FAILURE);
+    if (tcp_passive_open(&(newSocket->tcpPointer), param->portNumber) != TCP_NO_ERROR) exit(EXIT_FAILURE);
     addNewFd(&fds,list,newSocket);
-    server_fd = newSocket->tcpPointer->sd;  
+    server_fd = newSocket->tcpPointer->sd; 
+    SERVER_OPENS_CONNECTION(param->portNumber,(*(param->ptrToFilePtr)));
     //Loop waiting for incoming connects or for incoming data on any of the connected sockets.                          
     do
     {
@@ -34,10 +34,9 @@ void connmgr_listen(int port_number){
             perror("There was an error doing the polling");
             break;}
         if (result == 0){   
-            printf("  poll() timed out.End program.\n");
+            printf("poll() timed out.End program.\n");
             end_server = TRUE; // The program will close. 
             break;}
-
 
         // One or more descriptors are readable.  Need to determine which ones they are.
         current_size = dpl_size(list);
@@ -53,7 +52,7 @@ void connmgr_listen(int port_number){
             }
             if (fds[i].fd == server_fd) // server_fd never changes 
             {               
-                    printf("Listening socket is readable\n");
+                    // printf("Listening socket is readable\n");
                     newSocket = malloc(sizeof(socket_sensor_t));// make space on heap for new socket 
                     result = tcp_wait_for_connection(((socket_sensor_t*)dpl_get_element_at_index(list,INDEX_OF_SERVER))->tcpPointer, &(newSocket->tcpPointer));
                     // make a new connection
@@ -62,53 +61,59 @@ void connmgr_listen(int port_number){
                         end_server = TRUE; 
                         break;
                     } 
+                    newSocket->id = 0;
                     time(&(newSocket->ts));
-                    addNewFd(&fds,list,newSocket);
-                    
+                    addNewFd(&fds,list,newSocket);       
             }
 
             else
             {
-                    //printf("Descriptor %d is readable\n", fds[i].fd);
                     /* Receive all incoming data on this socket            */
                         do {
                                 
                                 newSocket = dpl_get_element_at_index(list,i); // add check to see if data is found 
-                                // read sensor ID
+                                // read sensor data
                                 int bytes = sizeof(data.id);
                                 result = tcp_receive(newSocket->tcpPointer, (void *) &data.id, &bytes);
-                                // read temperature
                                 bytes = sizeof(data.value);
                                 result = tcp_receive(newSocket->tcpPointer, (void *) &data.value, &bytes);
-                                // read timestamp
                                 bytes = sizeof(data.ts);
                                 result = tcp_receive(newSocket->tcpPointer, (void *) &data.ts, &bytes);
                                 if ((result == TCP_NO_ERROR) && bytes) {
                                     time(&(newSocket->ts));
-                                    fprintf(sensor_data_recv,"sensor id = %" PRIu16 " - temperature = %g - timestamp = %ld\n", data.id, data.value,(long int) data.ts);
-                                    //printf("sensor id = %" PRIu16 " - temperature = %g - timestamp = %ld\n", data.id, data.value,(long int) data.ts);
-                                    printf("fd== %d sensor id = %" PRIu16 " - temperature = %g - timestamp = %ld\n",fds[i].fd, data.id, data.value,(long int) data.ts);
+                                    if(newSocket->id==0){
+                                        newSocket->id = data.id;
+                                        NEW_SENSOR((newSocket->id),(*(param->ptrToFilePtr)));
+                                    }
+                                    resultLock = pthread_mutex_lock( param->data_mutex ); /// critical secction  
+                                    SYNCRONIZATION_ERROR(resultLock);
+                                    sbuffer_insert(param->bufferHead,&data);
+                                    #ifdef DEBUG_CONN_MGR  
+                                            printf("B:\t%d\t%f\t%ld\n",data.id,data.value,data.ts);
+                                    #endif
+                                    resultLock = pthread_cond_broadcast(param->myConVar);        //// communicate that there is data available. 
+                                    SYNCRONIZATION_ERROR(resultLock);
+                                    resultLock = pthread_mutex_unlock(param->data_mutex );
+                                    SYNCRONIZATION_ERROR(resultLock);
                                     break;    
                                 }
-                                else if (result == TCP_CONNECTION_CLOSED){
+                                else{
+                                    SENSOR_DISCONECTED(newSocket->id,(*(param->ptrToFilePtr)));
                                     removeFd(&fds,list,i);
-                                    break;
-                                } 
-                                else {
-                                    perror("\nError when reading from sensor.\n");
-                                    removeFd(&fds,list,i);
+                                    if (result != TCP_CONNECTION_CLOSED)perror("\nError when reading from sensor.\n");
                                     break;
                                 }
                             } while (TRUE);
             }
         }/// end of big loop of pollable descriptors 
     } while (end_server == FALSE); // End of serving running.
-    connmgr_free(sensor_data_recv,list,&fds);   
+    connmgr_free(list,&fds); 
+    pthread_exit(NULL);
+
 }
 
 
-void connmgr_free(FILE* file,dplist_t* mylist, pollfd_t** ptrToFds){
-    fclose(file);
+void connmgr_free(dplist_t* mylist, pollfd_t** ptrToFds){
     dpl_free(&mylist,true);
     free(*ptrToFds);
     printf("\nThe server waitng time has expired.\nThe server has shut down sucessfully.\n");
@@ -125,7 +130,7 @@ int addNewFd(pollfd_t** ptrToFds,dplist_t * list,socket_sensor_t* socket){
         printf("Memory not allocated.\n");
         return 1;
     }
-    else    printf("Memory allocated.\n");
+    //else    printf("New Fd registered.\n");
 
     pollfd_t* fds = *ptrToFds;
     fds[size].fd=socket->tcpPointer->sd;
@@ -135,8 +140,7 @@ int addNewFd(pollfd_t** ptrToFds,dplist_t * list,socket_sensor_t* socket){
 }
 
 int removeFd(pollfd_t** ptrToFds,dplist_t * list, int index){
-    printf("\nPeer has closed connection the fd was %d\n",((socket_sensor_t*)dpl_get_element_at_index(list,index))->tcpPointer->sd);
-    //printf("size of list %d\n",dpl_size(list));
+
     dpl_remove_at_index(list, index,true);
     free(*ptrToFds);
     *ptrToFds = calloc(dpl_size(list),sizeof(pollfd_t));
@@ -183,10 +187,11 @@ int validateSockets(dplist_t* list,pollfd_t** ptrToFds){
         socket = ((socket_sensor_t*) dpl_get_element_at_index(list,i));
         r1= difftime(t_now,socket->ts);
         if (r1>TIMEOUT){
-        printf("\nConnection with fd %d has expired.\nNo data sent over the past %f seconds.\n",socket->tcpPointer->sd,r1);    
-        removeFd(ptrToFds,list,i);
+            printf("\nConnection with fd %d has expired.\nNo data sent over the past %f seconds.\n",socket->tcpPointer->sd,r1);    
+            removeFd(ptrToFds,list,i);
         }
-    }   
+    }
+    return 0;   
 }
 
 

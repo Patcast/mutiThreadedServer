@@ -13,8 +13,8 @@
 #define SBUFFER_SUCCESS_AND_DELETE 2
 #define SBUFFER_SUCCESS_AND_NO_DELETE 3
 
-#define STORAGE_MGR_FLAG 1
-#define DATA_MGR_FLAG 2
+#define STORAGE_MGR_FLAG 111
+#define DATA_MGR_FLAG 120
 #define TRUE 1
 #define FALSE 0
 
@@ -41,7 +41,8 @@ typedef struct {
     pthread_cond_t*  myConVar;  
     char* tcpOpenFlag; 
     sbuffer_t* bufferHead;
-    FILE ** ptrToFilePtr;      
+    FILE ** ptrToFilePtr;
+    int portNumber;      
 } thread_parameters_t;
 
 /**

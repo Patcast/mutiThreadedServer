@@ -18,6 +18,10 @@
 #define DB_NAME Sensor.db
 #endif
 
+#ifndef MAKE_NEW_TABLE
+#define MAKE_NEW_TABLE FALSE
+#endif
+
 #ifndef TABLE_NAME
 #define TABLE_NAME SensorData
 #endif

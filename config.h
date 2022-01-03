@@ -9,7 +9,7 @@
 #define _GNU_SOURCE
 
 
-#define MAX_CHAR 50
+#define MAX_CHAR 100
 #define COM_CODE 9876
 #define FIFO_NAME 	"filesAndData/logFifo" 
 
@@ -30,13 +30,15 @@
 #include <inttypes.h>
 #include <poll.h>
 #include <signal.h>  // not sure if I need it 
+#include <check.h>
 
 #include "errmacros.h"
 #include "logGenerator.h"
 #include "lib/dplist.h"
 #include "lib/tcpsock.h"
 
-
+#define TRUE             1
+#define FALSE            0
 
 typedef uint16_t sensor_id_t;
 typedef double sensor_value_t;
@@ -51,11 +53,11 @@ typedef struct {
     sensor_ts_t ts;         /** < sensor timestamp */
 } sensor_data_t;
 
-typedef enum log_code { 
+/* typedef enum log_code { 
     CONNECTED_DB = 0, 
     NOT_CONNECTED,
     FILE_OPEN,
-    FILE_FAILURE}log_code_t;
+    FILE_FAILURE}log_code_t; */
 
 
 
