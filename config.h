@@ -8,6 +8,7 @@
 
 #define _GNU_SOURCE
 
+#define DBCONN sqlite3
 
 #define MAX_CHAR 100
 #define COM_CODE 9876

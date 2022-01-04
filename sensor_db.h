@@ -26,10 +26,9 @@
 #define TABLE_NAME SensorData
 #endif
 
-#define DBCONN sqlite3
 #include "sbuffer.h"
 
-
+void cleanup_handler_storage(void *arg);
 typedef int (*callback_t)(void *, int, char **, char **);
 
 /**
@@ -116,3 +115,6 @@ int executeSQL(DBCONN** db,char* sql,callback_t f);
 int callback(void *, int, char **, char **);
 void *storageManager(void * thread_param_input);
 #endif /* _SENSOR_DB_H_ */
+
+
+

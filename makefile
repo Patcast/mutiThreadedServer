@@ -37,7 +37,7 @@ valgrind: sensor_db.c main.c
 	@gcc $(SOURCE) $(LIBS) $(DEFINES) -g -o  build/database $(FLAGS)
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'
-	@valgrind -s ./build/database $(PORT)
+	@valgrind -s --leak-check=full ./build/database $(PORT) 
 gdb: 
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
@@ -50,4 +50,4 @@ gdb:
 	@gdb -q -tui ./build/database $(PORT)
 
 zip:
-	@zip filesAndData/lab6_ex2.zip sensor_db.c config.h
+	@zip filesAndData/final.zip sensor_db.c datamgr.c main.c connmgr.c sbuffer.c lib/tcpsock.c lib/dplist.c sensor_db.h datamgr.h connmgr.h sbuffer.h lib/tcpsock.h lib/dplist.h logGenerator.h errmacros.h config.h

@@ -38,11 +38,13 @@ typedef struct sbuffer {
 
 typedef struct {
     pthread_mutex_t* data_mutex;         
-    pthread_cond_t*  myConVar;  
+    pthread_cond_t*  myConVar;
     char* tcpOpenFlag; 
     sbuffer_t* bufferHead;
     FILE ** ptrToFilePtr;
-    int portNumber;      
+    int portNumber;
+    DBCONN *  db;
+    pthread_t* tcp_thread;
 } thread_parameters_t;
 
 /**

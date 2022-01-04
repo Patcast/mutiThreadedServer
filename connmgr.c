@@ -1,6 +1,20 @@
 #include "connmgr.h"
 
+typedef struct paramsCon{
+    dplist_t** list;
+    pollfd_t** fds;
+}exit_params_t;
 
+void cleanup_handler_connMgr(void *arg){
+
+    #ifdef DEBUG_CONN_MGR  
+         printf("Connection manager is closing...\n");
+    #endif 
+    exit_params_t* param = arg;
+    if(*(param->list)!=NULL)dpl_free((param->list),true);
+    if(*(param->fds)!=NULL)free(*(param->fds));
+    free(param);
+}
 
 
 void* connmgr_listen(void * thread_param_input){
@@ -11,19 +25,23 @@ void* connmgr_listen(void * thread_param_input){
     sensor_data_t data;
     char end_server = FALSE;
     socket_sensor_t * newSocket;
-    
+    exit_params_t * exit_params;
+    exit_params = malloc(sizeof(exit_params_t));
+    MEMORY_ERROR(exit_params);
+
+    exit_params->list=&list;
+    exit_params->fds= &fds;
     thread_parameters_t* param = thread_param_input;
-
-
+    pthread_cleanup_push(cleanup_handler_connMgr, exit_params);
     list = dpl_create(element_copy,element_free,element_compare);
 
     // Start server socket & Set up the initial listening socket 
-    // printf("Test server is started\n");
     newSocket = malloc(sizeof(socket_sensor_t));// make space on heap for new socket 
     if (tcp_passive_open(&(newSocket->tcpPointer), param->portNumber) != TCP_NO_ERROR) exit(EXIT_FAILURE);
     addNewFd(&fds,list,newSocket);
     server_fd = newSocket->tcpPointer->sd; 
     SERVER_OPENS_CONNECTION(param->portNumber,(*(param->ptrToFilePtr)));
+
     //Loop waiting for incoming connects or for incoming data on any of the connected sockets.                          
     do
     {
@@ -33,8 +51,8 @@ void* connmgr_listen(void * thread_param_input){
         if (result < 0) {
             perror("There was an error doing the polling");
             break;}
-        if (result == 0){   
-            printf("poll() timed out.End program.\n");
+        if (result == 0){  
+            printf("\nThe server waitng time has expired.\nThe server has shut down sucessfully.\n");
             end_server = TRUE; // The program will close. 
             break;}
 
@@ -107,17 +125,11 @@ void* connmgr_listen(void * thread_param_input){
             }
         }/// end of big loop of pollable descriptors 
     } while (end_server == FALSE); // End of serving running.
-    connmgr_free(list,&fds); 
-    pthread_exit(NULL);
-
+    // connmgr_free(list,&fds); 
+    pthread_cleanup_pop(TRUE);
+    return NULL;
 }
 
-
-void connmgr_free(dplist_t* mylist, pollfd_t** ptrToFds){
-    dpl_free(&mylist,true);
-    free(*ptrToFds);
-    printf("\nThe server waitng time has expired.\nThe server has shut down sucessfully.\n");
-}
 
 int addNewFd(pollfd_t** ptrToFds,dplist_t * list,socket_sensor_t* socket){
     int size = dpl_size(list);

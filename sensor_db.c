@@ -6,6 +6,25 @@
 
 ///////* Main Method***************///////
 
+void cleanup_handler_storage(void *arg){
+    /// there is not release of the mutex_lock.
+    #ifdef DEBUG_STORAGE_MGR  
+         printf("Storage is closing...\n");
+    #endif 
+    thread_parameters_t* param = arg;
+    if (param->db != NULL){
+        disconnect(param ->db);
+        param ->db = NULL;
+        printf("\n\n\ndb closed correctly\n\n");
+    }
+    else {
+        printf("\n\n\ndb closed incorrectly\n\n");
+        SERVER_FAIL_DB_CONNECTION((*(param->ptrToFilePtr)));
+        pthread_cancel(*(param->tcp_thread));
+    } 
+    DISCONNECT_DB((*(param->ptrToFilePtr))); 
+}
+
 
 void* storageManager(void * thread_param_input){
 
@@ -13,15 +32,13 @@ void* storageManager(void * thread_param_input){
     sensor_data_t dataInPtr;
     thread_parameters_t* param = thread_param_input;
     DBCONN *db;
+    pthread_cleanup_push(cleanup_handler_storage, thread_param_input);
     db = init_connection(MAKE_NEW_TABLE);
+    param->db = db;
     CONNECT_DB((db!=NULL),(*(param->ptrToFilePtr)));
-
     NEW_TABLE_ON_DB(MAKE_NEW_TABLE,*(param->ptrToFilePtr));
-   /*  if(db==NULL) log_code_generator(NOT_CONNECTED,fp);//// Do this as part of the macro
-    else log_code_generator(CONNECTED_DB,fp); */
-    
-
     while(1){
+        
 
         resultLock = pthread_mutex_lock( param->data_mutex ); /// critical secction  
         SYNCRONIZATION_ERROR(resultLock);
@@ -43,13 +60,9 @@ void* storageManager(void * thread_param_input){
             insert_sensor(db,dataInPtr.id,dataInPtr.value,dataInPtr.ts);
         }
         if(*(param->tcpOpenFlag )==FALSE && !(resultBuffer ==SBUFFER_SUCCESS))break;
-    }
-    #ifdef DEBUG_STORAGE_MGR  
-         printf("Storage is closing...\n");
-    #endif
-    disconnect(db);
-    DISCONNECT_DB((*(param->ptrToFilePtr))); 
-    pthread_exit(NULL);
+    } 
+    pthread_cleanup_pop(TRUE);
+    return NULL;
 }
 
 
@@ -67,20 +80,23 @@ int callback(void *NotUsed, int argc, char **argv, char **azColName) {
        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
     }
     printf("\n");
-    
     return 0;
 }
 
 
 DBCONN* init_connection(char clear_up_flag){
     DBCONN* db;
-    int rc = sqlite3_open( TO_STRING(DB_NAME), &db);
-    if (rc != SQLITE_OK) {
-        
+    char count;
+    // while(sqlite3_open( TO_STRING(DB_NAME), &db)!=SQLITE_OK && count<3){  
+    while(sqlite3_open( TO_STRING(DB_NAME), &db)!=SQLITE_OK && count<3){  
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
         db = NULL;
-        ///normally program should be shut down if error. Here does not happen.
+        count ++;
+        sleep(2);
     }
+    if(db==NULL) pthread_exit(NULL);
+
+    
     char* sql;
     if(clear_up_flag==1){
 
@@ -96,8 +112,9 @@ DBCONN* init_connection(char clear_up_flag){
 }
 
 void disconnect(DBCONN *conn){
-    sqlite3_close(conn);
+    sqlite3_close(conn);        
 }
+
 
 int executeSQL(DBCONN** db,char* sql,callback_t f){
     char *err_msg = 0;

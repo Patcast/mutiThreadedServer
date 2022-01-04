@@ -3,7 +3,7 @@
 #include "connmgr.h"
 #include "datamgr.h"
 
-//__sig_atomic_t closingFlag;
+
 
 int treadsHandler(char* port);
 void freeThreadsParam(thread_parameters_t* thread_param);
@@ -41,12 +41,12 @@ int main ( int argc, char *argv[]  ){
 int treadsHandler(char* portString){
     thread_parameters_t* thread_param;
     int result;
-    pthread_t   t_tcp,t_dataManager, t_storageManager;
+    pthread_t   t_dataManager, t_storageManager;
     int port;
     sscanf(portString, "%d", &port);  
     thread_param = startThreadsParam(port);
     ////*** CREATE THREADS
-    result= pthread_create(&t_tcp,NULL,connmgr_listen,(void*)thread_param);
+    result= pthread_create(thread_param->tcp_thread,NULL,connmgr_listen,(void*)thread_param);
     THREAD_ERROR(result);
     result= pthread_create(&t_dataManager,NULL,dataManager,(void*)thread_param);
     THREAD_ERROR(result);
@@ -54,7 +54,7 @@ int treadsHandler(char* portString){
     THREAD_ERROR(result);
 
     ////*** CLOSE WRTINIG THREAD 
-  	result= pthread_join(t_tcp, NULL);
+  	result= pthread_join(*(thread_param->tcp_thread), NULL);
     THREAD_ERROR(result);    
     
     ////*** NOTIFY READING THREADS TO CLOSE 
@@ -93,6 +93,8 @@ thread_parameters_t* startThreadsParam(int port ){
     MEMORY_ERROR(thread_param->data_mutex);
     thread_param->myConVar = malloc(sizeof(pthread_cond_t));
     MEMORY_ERROR(thread_param->myConVar);
+    thread_param->tcp_thread = malloc(sizeof(pthread_t));
+    MEMORY_ERROR(thread_param->tcp_thread);
     thread_param->tcpOpenFlag = malloc(sizeof(char)); 
     MEMORY_ERROR(thread_param->tcpOpenFlag);
     *(thread_param->data_mutex) =( pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
@@ -110,13 +112,12 @@ void freeThreadsParam(thread_parameters_t* thread_param){
     SYNCRONIZATION_ERROR(result);
     free(thread_param->data_mutex);
     free(thread_param->myConVar);
+    free(thread_param->tcp_thread);
     free(thread_param->tcpOpenFlag);
     result = fclose(*(thread_param->ptrToFilePtr));
     FILE_CLOSE_ERROR(result);
     free(thread_param->ptrToFilePtr);
-    // if(thread_param->bufferHead->head==NULL)printf("\n\nOn closing buffer is empty\n\n");
     free((thread_param->bufferHead));
-    //free(thread_param->bufferHead);// assumes that buffer is empty at this point. 
     free(thread_param);
 }
 

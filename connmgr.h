@@ -19,7 +19,6 @@ typedef struct socket_sensor{
 }socket_sensor_t;
 
 void* connmgr_listen(void * thread_params);
-void connmgr_free(dplist_t* mylist, pollfd_t** ptrToFds);
 void* element_copy(void * element);
 void element_free(void** element);
 int element_compare(void * x, void * y);
