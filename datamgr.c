@@ -41,14 +41,18 @@ void* dataManager(void * thread_param_input){
      
         resultBuffer =findBufferNode(param->bufferHead,DATA_MGR_FLAG,param->bufferLocks ,&dataIn);
         while(*(param->tcpOpenFlag )==TRUE && resultBuffer==SBUFFER_NO_DATA){
-            printf("\nwait Data\n");
+            #ifdef DEBUG_BUFFER  
+                printf("\nwait Data\n");
+            #endif 
             resultLock = pthread_mutex_lock( param->data_mutex ); /// critical secction  
             SYNCRONIZATION_ERROR(resultLock);
             int resultLock = pthread_cond_wait(param->myConVar ,param->data_mutex );
             SYNCRONIZATION_ERROR(resultLock);
             resultLock = pthread_mutex_unlock( param->data_mutex  );
             SYNCRONIZATION_ERROR(resultLock);
-            printf("\nawake Data\n");
+            #ifdef DEBUG_BUFFER  
+                printf("\nawake Data\n");
+            #endif  
             resultBuffer =findBufferNode(param->bufferHead,DATA_MGR_FLAG,param->bufferLocks ,&dataIn);
             #ifdef DEBUG_BUFFER  
                 printf("buffer outcome code:%d\n",resultBuffer);

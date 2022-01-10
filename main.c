@@ -58,7 +58,6 @@ int treadsHandler(char* portString){
     
  
     *(thread_param->tcpOpenFlag) = FALSE;
-    printf("Wake up all waiting threads...\n");
     result = pthread_cond_broadcast(thread_param->myConVar);
     SYNCRONIZATION_ERROR(result);
 
@@ -88,6 +87,7 @@ thread_parameters_t* startThreadsParam(int port ){
     MEMORY_ERROR(thread_param->bufferLocks->rw_head_lock);
     thread_param->bufferLocks->tail_lock= malloc(sizeof(pthread_rwlock_t));
     MEMORY_ERROR(thread_param->bufferLocks->tail_lock);
+
     thread_param->data_mutex = malloc(sizeof(pthread_mutex_t));
     MEMORY_ERROR(thread_param->data_mutex);
     thread_param->myConVar = malloc(sizeof(pthread_cond_t));
