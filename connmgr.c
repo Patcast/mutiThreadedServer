@@ -1,19 +1,17 @@
 #include "connmgr.h"
 
-typedef struct paramsCon{
-    dplist_t** list;
-    pollfd_t** fds;
-}exit_params_t;
+int totalPacketsReceived = 0;
 
 void cleanup_handler_connMgr(void *arg){
 
     #ifdef DEBUG_CONN_MGR  
          printf("Connection manager is closing...\n");
     #endif 
-    exit_params_t* param = arg;
+    exit_params_conn_t* param = arg;
     if(*(param->list)!=NULL)dpl_free((param->list),true);
     if(*(param->fds)!=NULL)free(*(param->fds));
     free(param);
+    pthread_exit(NULL);
 }
 
 
@@ -21,12 +19,12 @@ void* connmgr_listen(void * thread_param_input){
 
     dplist_t* list;
     pollfd_t* fds=NULL;
-    int  server_fd, current_size,resultLock,result,timeout = (TIMEOUT * 1000);
+    int  server_fd,timeout = (TIMEOUT * 1000);
     sensor_data_t data;
     char end_server = FALSE;
     socket_sensor_t * newSocket;
-    exit_params_t * exit_params;
-    exit_params = malloc(sizeof(exit_params_t));
+    exit_params_conn_t * exit_params;
+    exit_params = malloc(sizeof(exit_params_conn_t));
     MEMORY_ERROR(exit_params);
 
     exit_params->list=&list;
@@ -45,16 +43,11 @@ void* connmgr_listen(void * thread_param_input){
     //Loop waiting for incoming connects or for incoming data on any of the connected sockets.                          
     do
     {
-        result = validateSockets(list,&fds);
+        int current_size,result,resultLock;
+        validateSockets(list,&fds);
         printf("...\n");
         result = poll(fds, dpl_size(list), timeout);
-        if (result < 0) {
-            perror("There was an error doing the polling");
-            break;}
-        if (result == 0){  
-            printf("\nThe server waitng time has expired.\nThe server has shut down sucessfully.\n");
-            end_server = TRUE; // The program will close. 
-            break;}
+        POLL_ERROR(result);
 
         // One or more descriptors are readable.  Need to determine which ones they are.
         current_size = dpl_size(list);
@@ -92,9 +85,9 @@ void* connmgr_listen(void * thread_param_input){
                                 newSocket = dpl_get_element_at_index(list,i); // add check to see if data is found 
                                 // read sensor data
                                 int bytes = sizeof(data.id);
-                                result = tcp_receive(newSocket->tcpPointer, (void *) &data.id, &bytes);
+                                tcp_receive(newSocket->tcpPointer, (void *) &data.id, &bytes);
                                 bytes = sizeof(data.value);
-                                result = tcp_receive(newSocket->tcpPointer, (void *) &data.value, &bytes);
+                                tcp_receive(newSocket->tcpPointer, (void *) &data.value, &bytes);
                                 bytes = sizeof(data.ts);
                                 result = tcp_receive(newSocket->tcpPointer, (void *) &data.ts, &bytes);
                                 if ((result == TCP_NO_ERROR) && bytes) {
@@ -103,15 +96,13 @@ void* connmgr_listen(void * thread_param_input){
                                         newSocket->id = data.id;
                                         NEW_SENSOR((newSocket->id),(*(param->ptrToFilePtr)));
                                     }
-                                    resultLock = pthread_mutex_lock( param->data_mutex ); /// critical secction  
-                                    SYNCRONIZATION_ERROR(resultLock);
-                                    sbuffer_insert(param->bufferHead,&data);
+
+                                    sbuffer_insert(param->bufferHead,&data,param->bufferLocks);
+                                    totalPacketsReceived++;
                                     #ifdef DEBUG_CONN_MGR  
-                                            printf("B:\t%d\t%f\t%ld\n",data.id,data.value,data.ts);
+                                            printf("packet %d: %d\t%f\t%ld\n",totalPacketsReceived,data.id,data.value,data.ts);
                                     #endif
                                     resultLock = pthread_cond_broadcast(param->myConVar);        //// communicate that there is data available. 
-                                    SYNCRONIZATION_ERROR(resultLock);
-                                    resultLock = pthread_mutex_unlock(param->data_mutex );
                                     SYNCRONIZATION_ERROR(resultLock);
                                     break;    
                                 }
@@ -125,7 +116,6 @@ void* connmgr_listen(void * thread_param_input){
             }
         }/// end of big loop of pollable descriptors 
     } while (end_server == FALSE); // End of serving running.
-    // connmgr_free(list,&fds); 
     pthread_cleanup_pop(TRUE);
     return NULL;
 }
@@ -189,13 +179,12 @@ int element_compare(void * x_data, void * y_data) {
 }
 
 int validateSockets(dplist_t* list,pollfd_t** ptrToFds){
-     time_t  t_now;
-     double r1;
-     socket_sensor_t* socket;
-
+    time_t  t_now;
     time(&t_now);
 
     for (int i = 1; i<dpl_size(list);i++){
+        socket_sensor_t* socket;
+        double r1;
         socket = ((socket_sensor_t*) dpl_get_element_at_index(list,i));
         r1= difftime(t_now,socket->ts);
         if (r1>TIMEOUT){

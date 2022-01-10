@@ -28,12 +28,18 @@ typedef struct sbuffer_node {
     char readByDataMgr;
 } sbuffer_node_t;
 
+typedef struct sbuffer_locks{
+    pthread_rwlock_t * rw_head_lock;
+    pthread_mutex_t *  tail_lock;
+} sbuffer_lock_t;
+
 /**
  * a structure to keep track of the buffer
  */
 typedef struct sbuffer {
     sbuffer_node_t *head;       /**< a pointer to the first node in the buffer */
     sbuffer_node_t *tail;       /**< a pointer to the last node in the buffer */
+    long int size;
 }sbuffer_t;
 
 typedef struct {
@@ -43,8 +49,8 @@ typedef struct {
     sbuffer_t* bufferHead;
     FILE ** ptrToFilePtr;
     int portNumber;
-    DBCONN *  db;
     pthread_t* tcp_thread;
+    sbuffer_lock_t* bufferLocks;
 } thread_parameters_t;
 
 /**
@@ -68,7 +74,7 @@ int sbuffer_free(sbuffer_t **buffer);
  * \param data a pointer to pre-allocated sensor_data_t space, the data will be copied into this structure. No new memory is allocated for 'data' in this function.
  * \return SBUFFER_SUCCESS on success and SBUFFER_FAILURE if an error occurred
  */
-int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char manager_flag);
+int sbuffer_remove(sbuffer_t *buffer, sbuffer_lock_t* buffer_locks);
 
 /**
  * Inserts the sensor data in 'data' at the end of 'buffer' (at the 'tail')
@@ -76,10 +82,9 @@ int sbuffer_remove(sbuffer_t *buffer, sensor_data_t* data,char manager_flag);
  * \param data a pointer to sensor_data_t data, that will be copied into the buffer
  * \return SBUFFER_SUCCESS on success and SBUFFER_FAILURE if an error occured
 */
-int sbuffer_insert(sbuffer_t *buffer, sensor_data_t *data);
+int sbuffer_insert(sbuffer_t *buffer, sensor_data_t *data, sbuffer_lock_t* buffer_locks);
 
-int findBufferNode(sbuffer_node_t ** ptrDummy, sbuffer_t* buffer,char manager_flag);
+int findBufferNode(sbuffer_t* buffer,char manager_flag, sbuffer_lock_t* buffer_locks, sensor_data_t*data);
 
-int isBufferEmpty(sbuffer_t *buffer);
 
 #endif  //_SBUFFER_H_

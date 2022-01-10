@@ -24,7 +24,7 @@
 			{												\
  				fprintf(stderr,"\nIn %s - function %s at line %d: There was a syncronization error", __FILE__, __func__, __LINE__);\
 				fflush(stderr); \
-				exit( EXIT_FAILURE );						\
+				pthread_exit(NULL);						\
 			}												\
 		} while(0)
 		
@@ -63,7 +63,7 @@
 			if ( (err) == EOF )								\
 			{												\
 				perror("asprintf failed");					\
-				exit( EXIT_FAILURE );						\
+				pthread_exit(NULL);						\
 			}												\
 		} while(0)
 
@@ -72,7 +72,7 @@
 			if ( (err) == EOF )								\
 			{												\
 				perror("fflush failed");					\
-				exit( EXIT_FAILURE );						\
+				pthread_exit(NULL);						\
 			}												\
 		} while(0)
 #define THREAD_ERROR(err) 								\
@@ -90,19 +90,38 @@
 			{												\
  				fprintf(stderr,"\nIn %s - function %s at line %d: There was a syncronization error.\n\n", __FILE__, __func__, __LINE__);\
 				fflush(stderr); \
-				exit( EXIT_FAILURE );						\
+				pthread_exit(NULL);						\
 			}												\
 		} while(0)
 #define EMPTY_LIST() 								\
 		do {												\
  				fprintf(stderr,"\nIn %s - function %s at line %d:Cannot retive data. Because, the list is empty.\n\n", __FILE__, __func__, __LINE__);\
 				fflush(stderr); 			\
+				pthread_exit(NULL);\
 		} while(0)
 
 #define LIST_IS_NULL() 								\
 		do {												\
 				fprintf(stderr,"\nIn %s - function %s at line %d: Error from attempting to retrive data from NULL list.\n\n", __FILE__, __func__, __LINE__);\
 				fflush(stderr); 			\
-				exit( EXIT_FAILURE );						\
+				pthread_exit(NULL);						\
 		} while(0)
+#define POLL_ERROR(result) 								\
+		do {												\
+			if ( result <=0)								\
+			{												\
+				if(result == 0)							\
+				{									\
+					printf("\nThe server waitng time has expired.\nThe server has shut down sucessfully.\n");\
+					end_server = TRUE;  \
+				}				\
+				else{			\
+					printf("There was an error during the polling");\
+					pthread_exit(NULL);						\
+				}								\
+				break;		\
+			}							\
+		} while(0)
+
+
 #endif

@@ -4,7 +4,6 @@
 #include "datamgr.h"
 
 
-
 int treadsHandler(char* port);
 void freeThreadsParam(thread_parameters_t* thread_param);
 thread_parameters_t* startThreadsParam(int port );
@@ -57,17 +56,13 @@ int treadsHandler(char* portString){
   	result= pthread_join(*(thread_param->tcp_thread), NULL);
     THREAD_ERROR(result);    
     
-    ////*** NOTIFY READING THREADS TO CLOSE 
-    result = pthread_mutex_lock(thread_param->data_mutex);
-    SYNCRONIZATION_ERROR(result);
+ 
     *(thread_param->tcpOpenFlag) = FALSE;
     printf("Wake up all waiting threads...\n");
     result = pthread_cond_broadcast(thread_param->myConVar);
     SYNCRONIZATION_ERROR(result);
-    result = pthread_mutex_unlock(thread_param->data_mutex);
-    SYNCRONIZATION_ERROR(result);
 
-    ////*** WAIT FOR READING THREADS TO CLOSE 
+    ////*** CLOSING READING THREADS
     result= pthread_join(t_dataManager, NULL);
     THREAD_ERROR(result);
     result= pthread_join(t_storageManager, NULL);
@@ -82,13 +77,17 @@ thread_parameters_t* startThreadsParam(int port ){
     thread_param->ptrToFilePtr = malloc(sizeof(FILE*));
     MEMORY_ERROR( thread_param->ptrToFilePtr);
 
-    int result = mkfifo(FIFO_NAME, 0666);
+    int result = mkfifo(TO_STRING(FIFO_NAME), 0666);
     CHECK_MKFIFO(result); 	
-    *(thread_param->ptrToFilePtr) = fopen(FIFO_NAME, "w");
+    *(thread_param->ptrToFilePtr) = fopen(TO_STRING(FIFO_NAME), "w");
     FILE_OPEN_ERROR(*(thread_param->ptrToFilePtr));
     printf("\nsyncing with reader ok\n");
-    
-    MEMORY_ERROR(thread_param);
+    thread_param->bufferLocks= malloc(sizeof(sbuffer_lock_t));
+    MEMORY_ERROR(thread_param->bufferLocks);
+    thread_param->bufferLocks->rw_head_lock= malloc(sizeof(pthread_rwlock_t));
+    MEMORY_ERROR(thread_param->bufferLocks->rw_head_lock);
+    thread_param->bufferLocks->tail_lock= malloc(sizeof(pthread_rwlock_t));
+    MEMORY_ERROR(thread_param->bufferLocks->tail_lock);
     thread_param->data_mutex = malloc(sizeof(pthread_mutex_t));
     MEMORY_ERROR(thread_param->data_mutex);
     thread_param->myConVar = malloc(sizeof(pthread_cond_t));
@@ -97,12 +96,17 @@ thread_parameters_t* startThreadsParam(int port ){
     MEMORY_ERROR(thread_param->tcp_thread);
     thread_param->tcpOpenFlag = malloc(sizeof(char)); 
     MEMORY_ERROR(thread_param->tcpOpenFlag);
+
+    *(thread_param->bufferLocks->rw_head_lock) =( pthread_rwlock_t) PTHREAD_RWLOCK_INITIALIZER;
+    *(thread_param->bufferLocks->tail_lock ) = ( pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
     *(thread_param->data_mutex) =( pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
-    *(thread_param->myConVar) = (pthread_cond_t)PTHREAD_COND_INITIALIZER;
+    *(thread_param->myConVar) = (pthread_cond_t) PTHREAD_COND_INITIALIZER;
+
     *(thread_param->tcpOpenFlag) = 1; 
     sbuffer_init(&(thread_param->bufferHead));
     thread_param->portNumber = port;
     return thread_param;
+
 }
 
 void freeThreadsParam(thread_parameters_t* thread_param){
@@ -110,6 +114,9 @@ void freeThreadsParam(thread_parameters_t* thread_param){
     SYNCRONIZATION_ERROR(result);
     result = pthread_mutex_destroy( thread_param->data_mutex );
     SYNCRONIZATION_ERROR(result);
+    free(thread_param->bufferLocks->tail_lock );
+    free(thread_param->bufferLocks->rw_head_lock);
+    free(thread_param->bufferLocks);
     free(thread_param->data_mutex);
     free(thread_param->myConVar);
     free(thread_param->tcp_thread);
@@ -117,7 +124,7 @@ void freeThreadsParam(thread_parameters_t* thread_param){
     result = fclose(*(thread_param->ptrToFilePtr));
     FILE_CLOSE_ERROR(result);
     free(thread_param->ptrToFilePtr);
-    free((thread_param->bufferHead));
+    sbuffer_free(&(thread_param->bufferHead));
     free(thread_param);
 }
 
@@ -128,14 +135,13 @@ void startsLogFileGenerator(){
     char recv_buf[MAX_CHAR];
     char *str_result;
     int result;
-
     printf("\n\nchild process has started\n\n");
-    result = mkfifo(FIFO_NAME, 0666);
+    result = mkfifo(TO_STRING(FIFO_NAME), 0666);
     CHECK_MKFIFO(result); 
-    fp = fopen(FIFO_NAME, "r"); 
+    fp = fopen(TO_STRING(FIFO_NAME), "r"); 
     printf("syncing with writer ok\n");
     FILE_OPEN_ERROR(fp);
-    fp_log = fopen("filesAndData/gateway.log", "w");
+    fp_log = fopen("gateway.log", "w");
     FILE_OPEN_ERROR(fp_log);
 
     do 

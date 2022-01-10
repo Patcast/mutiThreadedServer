@@ -1,11 +1,11 @@
 #.DEFAULT_GOAL := valgrind
 
-.DEFAULT_GOAL := debug
+#.DEFAULT_GOAL := debug
 FLAGS = -Wall -std=c11 -Werror -lm -lsqlite3 -pthread -I/usr/local/include -L/usr/local/lib -lcheck	
 LIBS =  lib/tcpsock.c  -lmylist -L/lib/ 
 SOURCE= sensor_db.c datamgr.c main.c connmgr.c sbuffer.c
-DEFINES =  -DMAKE_NEW_TABLE=TRUE -DTIMEOUT=8 -DSET_MAX_TEMP=25 -DSET_MIN_TEMP=10 -DRUN_AVG_LENGTH=3
-DEBUG_FLAGS = -DDEBUG_DTA_MGR -DDEBUG_CONN_MGR -DDEBUG_STORAGE_MGR #-DDEBUG_BUFFER
+DEFINES =  -DMAKE_NEW_TABLE=TRUE -DTIMEOUT=8 -DSET_MAX_TEMP=20 -DSET_MIN_TEMP=10 -DRUN_AVG_LENGTH=3
+DEBUG_FLAGS =  -DDEBUG_BUFFER -DDEBUG_DTA_MGR -DDEBUG_CONN_MGR -DDEBUG_STORAGE_MGR 
 PORT = 4000
 
 test: 
@@ -13,7 +13,7 @@ test:
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
 	@mkdir -p build
-	@gcc $(SOURCE) $(LIBS) $(DEFINES) -o  build/database $(FLAGS) 
+	@gcc $(SOURCE) $(LIBS) $(DEFINES) $(FLAGS)  -o  build/database 
 	@echo -e '\n*************************'
 	@echo -e '*** Running UNIT TEST ***'
 	@echo -e '*************************'

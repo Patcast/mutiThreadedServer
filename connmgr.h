@@ -1,8 +1,6 @@
 #include "sbuffer.h"
 
 
-#define MAX	80
-#define MAX_CONN 30
 #define INDEX_OF_SERVER 0
 
 
@@ -17,6 +15,11 @@ typedef struct socket_sensor{
     tcpsock_t*  tcpPointer;
     sensor_id_t id; 
 }socket_sensor_t;
+
+typedef struct paramsConExit{
+    dplist_t** list;
+    pollfd_t** fds;
+}exit_params_conn_t;
 
 void* connmgr_listen(void * thread_params);
 void* element_copy(void * element);
