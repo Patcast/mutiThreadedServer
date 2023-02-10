@@ -1,11 +1,6 @@
 #define _GNU_SOURCE
 #include "sensor_db.h"
 
-
-
-
-
-
 void cleanup_handler_storage(void *arg){
     #ifdef DEBUG_STORAGE_MGR  
          printf("Storage Manager is closing...\n");
@@ -137,6 +132,7 @@ int executeSQL(DBCONN** db,char* sql,callback_t f){
     free(sql);
     return rc;
 }
+
 int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_t ts){
     char* sql;
     asprintf(&sql,"INSERT INTO %s (sensor_id,sensor_value,timestamp) VALUES( %d, %f,%ld);",TO_STRING(TABLE_NAME),id,value,ts); 

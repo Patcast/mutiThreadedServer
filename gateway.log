@@ -1,40 +1,12 @@
-0	1641823783	TCP socket started and lisening on PORT 4000.
+0	1642329037	TCP socket started and lisening on PORT 4000.
 
-1	1641823783	Connected successfully to db.
+1	1642329037	Connected successfully to db.
 
-2	1641823783	A new table was made on the DB.
+2	1642329037	A new table was made on the DB.
 
-3	1641823788	New sensor connected to server. Sensor id: 129.
+3	1642329041	New sensor connected to server. Sensor id: 129.
 
-4	1641823794	Sensor disconnected to server. Sensor id: 129.
+4	1642329057	Sensor disconnected to server. Sensor id: 129.
 
-5	1641823799	New sensor connected to server. Sensor id: 129.
-
-6	1641823800	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.074051
-
-7	1641823801	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.203268
-
-8	1641823802	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.253099
-
-9	1641823803	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.342685
-
-10	1641823804	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.308236
-
-11	1641823805	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.291986
-
-12	1641823806	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.308262
-
-13	1641823807	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.433668
-
-14	1641823808	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.590476
-
-15	1641823809	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.697532
-
-16	1641823810	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.773996
-
-17	1641823811	The room 12 is too HOT. Sensor_id 129, Temp avarage 20.850541
-
-18	1641823811	Sensor disconnected to server. Sensor id: 129.
-
-19	1641823819	Connection with db is closed.
+5	1642329065	Connection with db is closed.
 

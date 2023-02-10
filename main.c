@@ -55,8 +55,8 @@ int treadsHandler(char* portString){
     ////*** CLOSE WRTINIG THREAD 
   	result= pthread_join(*(thread_param->tcp_thread), NULL);
     THREAD_ERROR(result);    
-    
- 
+
+
     *(thread_param->tcpOpenFlag) = FALSE;
     result = pthread_cond_broadcast(thread_param->myConVar);
     SYNCRONIZATION_ERROR(result);
@@ -149,7 +149,7 @@ void startsLogFileGenerator(){
         str_result = fgets(recv_buf, MAX_CHAR, fp);
         if ( str_result != NULL )
         { 
-        printf("message from storageManager :\t%d\t%lu\t%s\n",recordNumber,time(NULL),str_result);
+        printf("New Log:\t%d\t%lu\t%s\n",recordNumber,time(NULL),str_result);
         fprintf(fp_log,"%d\t%lu\t%s\n",recordNumber,time(NULL),str_result);
         recordNumber++;
         }

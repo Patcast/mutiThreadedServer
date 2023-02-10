@@ -36,7 +36,7 @@ void* dataManager(void * thread_param_input){
     fclose(fileRoom);
 
     while(1){
-        int resultBuffer, resultLock;
+        int resultBuffer;
 
      
         resultBuffer =findBufferNode(param->bufferHead,DATA_MGR_FLAG,param->bufferLocks ,&dataIn);
@@ -44,9 +44,9 @@ void* dataManager(void * thread_param_input){
             #ifdef DEBUG_BUFFER  
                 printf("\nwait Data\n");
             #endif 
-            resultLock = pthread_mutex_lock( param->data_mutex ); /// critical secction  
+            int resultLock = pthread_mutex_lock( param->data_mutex ); /// critical secction  
             SYNCRONIZATION_ERROR(resultLock);
-            int resultLock = pthread_cond_wait(param->myConVar ,param->data_mutex );
+            resultLock = pthread_cond_wait(param->myConVar ,param->data_mutex );
             SYNCRONIZATION_ERROR(resultLock);
             resultLock = pthread_mutex_unlock( param->data_mutex  );
             SYNCRONIZATION_ERROR(resultLock);
@@ -119,7 +119,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, dplist_t * list){
     {     
         dpl_insert_at_index(list, createNewData(sensorIdIn,roomIdIn), count,false);
      #ifdef DEBUG_DTA_MGR   
-        printf("\nSensor id: %hi\tRoom id: %hi\n",sensorIdIn,roomIdIn);
+        printf("\nSensor id: %hd\tRoom id: %hd\n",sensorIdIn,roomIdIn);
      #endif   
         count++;
     }
@@ -139,7 +139,7 @@ void* createNewData(sensor_id_t idS,sensor_id_t idT){
     data -> ts = 0;
     data -> numRecAdded = 0;
     data -> ptrToRecords = createArray();
-    return (void*) data;
+    return  data;
 }
 void datamgr_free(dplist_t * list){
     dpl_free(&list,true);

@@ -18,7 +18,7 @@ void cleanup_handler_connMgr(void *arg){
 void* connmgr_listen(void * thread_param_input){
 
     dplist_t* list;
-    pollfd_t* fds=NULL;
+    pollfd_t* fds = NULL;
     int  server_fd,timeout = (TIMEOUT * 1000);
     sensor_data_t data;
     char end_server = FALSE;
@@ -61,6 +61,8 @@ void* connmgr_listen(void * thread_param_input){
                 end_server = TRUE;
                 break;
             }
+
+            
             if (fds[i].fd == server_fd) // server_fd never changes 
             {               
                     // printf("Listening socket is readable\n");
